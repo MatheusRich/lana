@@ -24,10 +24,17 @@ impl RispExpr {
         use colored::Colorize;
 
         match self {
-            RispExpr::Bool(_) => self.to_string().bold().cyan().to_string(),
+            RispExpr::Bool(_) => self.to_string().bold().purple().to_string(),
             RispExpr::Symbol(_) => self.to_string().bold().yellow().to_string(),
             RispExpr::Number(_) => self.to_string().bold().cyan().to_string(),
-            RispExpr::List(_) => self.to_string(),
+            RispExpr::List(list) => {
+                let xs: Vec<String> = list
+                    .iter()
+                    .map(|value| value.to_colorized_string())
+                    .collect();
+
+                format!("({})", xs.join(", "))
+            }
             RispExpr::Func(_) => self.to_string().green().to_string(),
         }
     }
@@ -39,7 +46,7 @@ impl std::fmt::Display for RispExpr {
             RispExpr::Bool(boolean) => boolean.to_string(),
             RispExpr::Symbol(s) => s.clone(),
             RispExpr::Number(n) => n.to_string(),
-            RispExpr::Func(_fn) => "Function {}".to_string(),
+            RispExpr::Func(function) => format!("fn({:p})", function),
             RispExpr::List(list) => {
                 let xs: Vec<String> = list.iter().map(|value| value.to_string()).collect();
 
