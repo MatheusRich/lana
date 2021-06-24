@@ -2,6 +2,7 @@ use super::RispErr;
 
 #[derive(Clone)]
 pub enum RispExpr {
+    Bool(bool),
     Symbol(String),
     Number(f64),
     List(Vec<RispExpr>),
@@ -11,19 +12,11 @@ pub enum RispExpr {
 impl RispExpr {
     pub fn enum_name(&self) -> String {
         match self {
+            RispExpr::Bool(_b) => "boolean".into(),
             RispExpr::Symbol(_s) => "symbol".into(),
             RispExpr::Number(_n) => "number".into(),
             RispExpr::List(_) => "list".into(),
             RispExpr::Func(_) => "func".into(),
-        }
-    }
-
-    pub fn name(&self) -> String {
-        match self {
-            RispExpr::Symbol(s) => s.clone(),
-            RispExpr::Number(n) => n.to_string(),
-            RispExpr::List(_) => "list".into(),
-            RispExpr::Func(_) => "function".into(),
         }
     }
 }
@@ -31,6 +24,7 @@ impl RispExpr {
 impl std::fmt::Display for RispExpr {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         let string = match self {
+            RispExpr::Bool(boolean) => boolean.to_string(),
             RispExpr::Symbol(s) => s.clone(),
             RispExpr::Number(n) => n.to_string(),
             RispExpr::Func(_fn) => "Function {}".to_string(),

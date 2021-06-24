@@ -10,13 +10,13 @@ fn main() {
     let env = &mut RispEnv::default();
 
     loop {
-        print!("risp >  ");
+        print!("risp>  ");
         let expr = slurp_expr();
 
         match parse_eval(expr, env) {
-            Ok(res) => println!("🔥 => {}", res),
+            Ok(res) => println!("=> {}", res),
             Err(e) => match e {
-                RispErr::Reason(msg) => println!("🙀 => {}", msg),
+                RispErr::Reason(msg) => println!("=> {}", msg),
             },
         }
     }
@@ -54,11 +54,11 @@ fn tokenize(code: String) -> Vec<String> {
 fn parse<'a>(tokens: &'a [String]) -> Result<(RispExpr, &'a [String]), RispErr> {
     let (token, rest) = tokens
         .split_first()
-        .ok_or_else(|| RispErr::Reason("could not get token".into()))?;
+        .ok_or_else(|| RispErr::Reason("Could not get token".into()))?;
 
     match token.as_str() {
         "(" => read_seq(rest),
-        ")" => Err(RispErr::Reason("expected ')'".into())),
+        ")" => Err(RispErr::Reason("Unexpected ')'".into())),
         _ => Ok((parse_atom(token), rest)),
     }
 }
@@ -84,11 +84,16 @@ fn read_seq<'a>(tokens: &'a [String]) -> Result<(RispExpr, &'a [String]), RispEr
 }
 
 fn parse_atom(token: &str) -> RispExpr {
-    let potential_number = token.parse::<f64>();
-
-    match potential_number {
-        Ok(value) => RispExpr::Number(value),
-        Err(_) => RispExpr::Symbol(token.to_string()),
+    match token {
+        "true" => RispExpr::Bool(true),
+        "false" => RispExpr::Bool(false),
+        _ => {
+            let potential_number = token.parse::<f64>();
+            match potential_number {
+                Ok(value) => RispExpr::Number(value),
+                Err(_) => RispExpr::Symbol(token.to_string()),
+            }
+        }
     }
 }
 
@@ -96,16 +101,17 @@ fn parse_atom(token: &str) -> RispExpr {
 
 fn eval(expr: &RispExpr, env: &mut RispEnv) -> Result<RispExpr, RispErr> {
     match expr {
+        RispExpr::Bool(_bool) => Ok(expr.clone()),
         RispExpr::Symbol(k) => env
             .data
             .get(k)
-            .ok_or_else(|| RispErr::Reason(format!("unexpected symbol k='{}'", k)))
+            .ok_or_else(|| RispErr::Reason(format!("Undefined symbol '{}'", k)))
             .map(|var| var.clone()),
         RispExpr::Number(_n) => Ok(expr.clone()),
         RispExpr::List(list) => {
             let (first_form, arg_forms) = list
                 .split_first()
-                .ok_or_else(|| RispErr::Reason("expected a non-empty list".into()))?;
+                .ok_or_else(|| RispErr::Reason("Expected a non-empty list".into()))?;
             let first_eval = eval(first_form, env)?;
 
             match first_eval {
@@ -116,13 +122,13 @@ fn eval(expr: &RispExpr, env: &mut RispEnv) -> Result<RispExpr, RispErr> {
                     function(&args_eval?)
                 }
                 _ => Err(RispErr::Reason(format!(
-                    "first form must be a function. Got {} '{}'",
+                    "First form must be a function, got {} '{}'",
                     first_eval.enum_name(),
-                    first_eval.name()
+                    first_eval.to_string()
                 ))),
             }
         }
-        _ => Err(RispErr::Reason("".into())),
+        RispExpr::Func(_) => Err(RispErr::Reason("Unexpected function".to_string())),
     }
 }
 
