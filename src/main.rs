@@ -40,9 +40,9 @@ fn repl() {
             }
             Err(e) => match e {
                 RispErr::Reason(msg) => {
-                    let s = format!("ERROR: {}", msg).bold().to_string();
+                    let s = format!("ERROR: {}.", msg).bold().red().to_string();
 
-                    println!("=> {}.", s)
+                    println!("=> {}", s)
                 }
             },
         }
