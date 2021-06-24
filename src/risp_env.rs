@@ -53,6 +53,30 @@ impl RispEnv {
         );
 
         std_lib.insert(
+            "*".to_string(),
+            RispExpr::Func(|args| {
+                let result = parse_list_of_floats(args)?
+                    .iter()
+                    .fold(1.0, |res, n| res * n);
+
+                Ok(RispExpr::Number(result))
+            }),
+        );
+
+        std_lib.insert(
+            "/".to_string(),
+            RispExpr::Func(|args| {
+                let numbers = parse_list_of_floats(args)?;
+                let (first, rest) = numbers
+                    .split_first()
+                    .ok_or_else(|| RispErr::Reason("Expected at least one number".into()))?;
+                let product_of_rest: f64 = rest.iter().fold(1.0, |res, n| res * n);
+
+                Ok(RispExpr::Number(first / product_of_rest))
+            }),
+        );
+
+        std_lib.insert(
             "=".to_string(),
             RispExpr::Func(ensure_tonicity!(|a, b| f64_aprox_eq(a, b))),
         );
