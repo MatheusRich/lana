@@ -7,10 +7,16 @@ use risp_err::RispErr;
 use risp_expr::RispExpr;
 
 fn main() {
+    repl();
+}
+
+fn repl() {
     let env = &mut RispEnv::default();
 
     loop {
-        print!("risp>  ");
+        use colored::Colorize;
+
+        print!("risp> ");
         let input = slurp_expr().trim().to_string();
 
         if input.is_empty() {
@@ -22,9 +28,13 @@ fn main() {
         }
 
         match parse_eval(input, env) {
-            Ok(res) => println!("=> {}", res),
+            Ok(res) => println!("=> {}", res.to_colorized_string()),
             Err(e) => match e {
-                RispErr::Reason(msg) => println!("=> {}", msg),
+                RispErr::Reason(msg) => {
+                    let s = format!("ERROR: {}", msg).bold().to_string();
+
+                    println!("=> {}.", s)
+                }
             },
         }
     }

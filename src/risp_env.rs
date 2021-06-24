@@ -90,8 +90,8 @@ fn parse_single_float(expr: &RispExpr) -> Result<f64, RispErr> {
     match expr {
         RispExpr::Number(n) => Ok(*n),
         other_expr => Err(RispErr::Reason(format!(
-            "Expected a number, got {}",
-            other_expr.to_string()
+            "Expected a number, got {:?}",
+            other_expr
         ))),
     }
 }
