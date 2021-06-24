@@ -11,9 +11,17 @@ fn main() {
 
     loop {
         print!("risp>  ");
-        let expr = slurp_expr();
+        let input = slurp_expr().trim().to_string();
 
-        match parse_eval(expr, env) {
+        if input.is_empty() {
+            continue;
+        }
+
+        if input == "quit" || input == "exit" {
+            break;
+        }
+
+        match parse_eval(input, env) {
             Ok(res) => println!("=> {}", res),
             Err(e) => match e {
                 RispErr::Reason(msg) => println!("=> {}", msg),
@@ -34,10 +42,11 @@ fn slurp_expr() -> String {
 
     let mut expr = String::new();
 
-    std::io::stdout().flush().expect("could not flush stdout");
+    std::io::stdout().flush().expect("Could not flush stdout");
     std::io::stdin()
         .read_line(&mut expr)
-        .expect("failed to read_line");
+        .expect("Failed to read_line");
+
     expr
 }
 
