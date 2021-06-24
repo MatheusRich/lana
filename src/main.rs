@@ -11,24 +11,33 @@ fn main() {
 }
 
 fn repl() {
+    use colored::Colorize;
+
     let env = &mut RispEnv::default();
 
     loop {
-        use colored::Colorize;
-
         print!("risp> ");
-        let input = slurp_expr().trim().to_string();
-
-        if input.is_empty() {
-            continue;
-        }
+        let input = slurp_expr();
 
         if input == "quit" || input == "exit" {
             break;
         }
 
+        if input == "help" {
+            println!("Sorry, the author was too lazy to actually code this 😅.");
+            continue;
+        }
+
+        if input.is_empty() {
+            continue;
+        }
+
         match parse_eval(input, env) {
-            Ok(res) => println!("=> {}", res.to_colorized_string()),
+            Ok(res) => {
+                env.data.insert("_".into(), res.clone());
+
+                println!("=> {}", res.to_colorized_string())
+            }
             Err(e) => match e {
                 RispErr::Reason(msg) => {
                     let s = format!("ERROR: {}", msg).bold().to_string();
@@ -57,7 +66,7 @@ fn slurp_expr() -> String {
         .read_line(&mut expr)
         .expect("Failed to read_line");
 
-    expr
+    expr.trim().to_string()
 }
 
 fn tokenize(code: String) -> Vec<String> {
