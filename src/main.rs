@@ -4,9 +4,10 @@ mod risp_expr;
 
 use risp_env::RispEnv;
 use risp_err::RispErr;
-use risp_expr::RispExpr;
+use risp_expr::{RispExpr, RispLambda};
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
+use std::rc::Rc;
 
 fn main() {
     repl();
@@ -168,6 +169,7 @@ fn eval(expr: &RispExpr, env: &mut RispEnv) -> Result<RispExpr, RispErr> {
             }
         }
         RispExpr::Func(_) => Err(RispErr::Reason("Unexpected function".to_string())),
+        RispExpr::Lambda(_) => Err(RispErr::Reason("Unexpected lambda".to_string())),
     }
 }
 
@@ -180,6 +182,7 @@ fn eval_built_in_form(
         RispExpr::Symbol(s) => match s.as_str() {
             "if" => Some(eval_if_args(args, env)),
             "def" => Some(eval_def_args(args, env)),
+            "fn" => Some(eval_lambda_args(args)),
             _ => None,
         },
         _ => None,
@@ -238,6 +241,26 @@ fn eval_def_args(args: &[RispExpr], env: &mut RispEnv) -> Result<RispExpr, RispE
     env.data.insert(var_name, value.clone());
 
     Ok(value)
+}
+
+fn eval_lambda_args(args: &[RispExpr]) -> Result<RispExpr, RispErr> {
+    let params = args
+        .first()
+        .ok_or_else(|| RispErr::Reason("Expected lambda args and body".into()))?;
+    let body = args
+        .get(1)
+        .ok_or_else(|| RispErr::Reason("Expected lambda body".into()))?;
+
+    if args.len() > 2 {
+        return Err(RispErr::Reason(
+            "Lambdas definition takes only 2 arguments".into(),
+        ));
+    }
+
+    Ok(RispExpr::Lambda(RispLambda {
+        body: Rc::new(body.clone()),
+        params: Rc::new(params.clone()),
+    }))
 }
 
 // Tests

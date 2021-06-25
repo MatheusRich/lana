@@ -1,4 +1,5 @@
 use super::RispErr;
+use std::rc::Rc;
 
 #[derive(Clone)]
 pub enum RispExpr {
@@ -7,6 +8,7 @@ pub enum RispExpr {
     Number(f64),
     List(Vec<RispExpr>),
     Func(fn(&[RispExpr]) -> Result<RispExpr, RispErr>),
+    Lambda(RispLambda),
 }
 
 impl RispExpr {
@@ -16,7 +18,8 @@ impl RispExpr {
             RispExpr::Symbol(_s) => "symbol".into(),
             RispExpr::Number(_n) => "number".into(),
             RispExpr::List(_) => "list".into(),
-            RispExpr::Func(_) => "func".into(),
+            RispExpr::Func(_) => "function".into(),
+            RispExpr::Lambda(_) => "lambda".into(),
         }
     }
 
@@ -36,6 +39,7 @@ impl RispExpr {
                 format!("({})", xs.join(", "))
             }
             RispExpr::Func(_) => self.to_string().green().to_string(),
+            RispExpr::Lambda(_) => self.to_string().green().to_string(),
         }
     }
 }
@@ -47,6 +51,7 @@ impl std::fmt::Display for RispExpr {
             RispExpr::Symbol(s) => s.clone(),
             RispExpr::Number(n) => n.to_string(),
             RispExpr::Func(function) => format!("fn({:p})", function),
+            RispExpr::Lambda(lambda) => format!("lambda({:p})", lambda),
             RispExpr::List(list) => {
                 let xs: Vec<String> = list.iter().map(|value| value.to_string()).collect();
 
@@ -62,4 +67,10 @@ impl std::fmt::Debug for RispExpr {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f, "{} '{}'", self.enum_name(), self.to_string())
     }
+}
+
+#[derive(Clone)]
+pub struct RispLambda {
+    pub params: Rc<RispExpr>,
+    pub body: Rc<RispExpr>,
 }
