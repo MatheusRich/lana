@@ -7,6 +7,7 @@ use risp_err::RispErr;
 use risp_expr::{RispExpr, RispLambda};
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
+use std::collections::HashMap;
 use std::rc::Rc;
 
 fn main() {
@@ -138,11 +139,9 @@ fn parse_atom(token: &str) -> RispExpr {
 fn eval(expr: &RispExpr, env: &mut RispEnv) -> Result<RispExpr, RispErr> {
     match expr {
         RispExpr::Bool(_bool) => Ok(expr.clone()),
-        RispExpr::Symbol(k) => env
-            .data
-            .get(k)
-            .ok_or_else(|| RispErr::Reason(format!("Undefined symbol '{}'", k)))
-            .map(|var| var.clone()),
+        RispExpr::Symbol(k) => {
+            env_get(k, env).ok_or_else(|| RispErr::Reason(format!("Undefined symbol '{}'", k)))
+        }
         RispExpr::Number(_n) => Ok(expr.clone()),
         RispExpr::List(list) => {
             let (first_form, arg_forms) = list
@@ -159,6 +158,10 @@ fn eval(expr: &RispExpr, env: &mut RispEnv) -> Result<RispExpr, RispErr> {
                                 arg_forms.iter().map(|arg| eval(arg, env)).collect();
                             function(&args_eval?)
                         }
+                        RispExpr::Lambda(lambda) => {
+                            let new_env = &mut env_for_lambda(lambda.params, arg_forms, env)?;
+                            eval(&lambda.body, new_env)
+                        }
                         _ => Err(RispErr::Reason(format!(
                             "First form must be a function, got {} '{}'",
                             first_eval.enum_name(),
@@ -171,6 +174,64 @@ fn eval(expr: &RispExpr, env: &mut RispEnv) -> Result<RispExpr, RispErr> {
         RispExpr::Func(_) => Err(RispErr::Reason("Unexpected function".to_string())),
         RispExpr::Lambda(_) => Err(RispErr::Reason("Unexpected lambda".to_string())),
     }
+}
+
+fn env_get(symbol: &str, env: &RispEnv) -> Option<RispExpr> {
+    match env.data.get(symbol) {
+        Some(expr) => Some(expr.clone()),
+        None => match &env.outer {
+            Some(outer_env) => env_get(symbol, outer_env),
+            None => None,
+        },
+    }
+}
+
+fn eval_exprs(args: &[RispExpr], env: &mut RispEnv) -> Result<Vec<RispExpr>, RispErr> {
+    args.iter().map(|arg| eval(arg, env)).collect()
+}
+
+fn parse_list_of_symbol_strings(expr: Rc<RispExpr>) -> Result<Vec<String>, RispErr> {
+    let list = match expr.as_ref() {
+        RispExpr::List(s) => Ok(s.clone()),
+        _ => Err(RispErr::Reason("Expected lambda args to be a list".into())),
+    }?;
+
+    list.iter()
+        .map(|arg| match arg {
+            RispExpr::Symbol(s) => Ok(s.clone()),
+            _ => Err(RispErr::Reason(
+                "Expected symbols in lambda argument list".into(),
+            )),
+        })
+        .collect()
+}
+
+fn env_for_lambda<'a>(
+    params: Rc<RispExpr>,
+    args: &[RispExpr],
+    outer_env: &'a mut RispEnv,
+) -> Result<RispEnv<'a>, RispErr> {
+    let symbols = parse_list_of_symbol_strings(params)?;
+
+    if symbols.len() != args.len() {
+        return Err(RispErr::Reason(format!(
+            "Expected {} arguments, got {}",
+            symbols.len(),
+            args.len()
+        )));
+    }
+
+    let vs = eval_exprs(args, outer_env)?;
+    let mut data: HashMap<String, RispExpr> = HashMap::new();
+
+    for (k, v) in symbols.iter().zip(vs.iter()) {
+        data.insert(k.clone(), v.clone());
+    }
+
+    Ok(RispEnv {
+        data,
+        outer: Some(outer_env),
+    })
 }
 
 fn eval_built_in_form(

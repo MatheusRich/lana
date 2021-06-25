@@ -22,11 +22,12 @@ macro_rules! ensure_tonicity {
     }};
 }
 
-pub struct RispEnv {
+pub struct RispEnv<'a> {
     pub data: HashMap<String, RispExpr>,
+    pub outer: Option<&'a RispEnv<'a>>
 }
 
-impl RispEnv {
+impl<'a> RispEnv<'a> {
     pub fn default() -> Self {
         let mut std_lib: HashMap<String, RispExpr> = HashMap::new();
 
@@ -98,7 +99,7 @@ impl RispEnv {
             RispExpr::Func(ensure_tonicity!(|a, b| a <= b)),
         );
 
-        RispEnv { data: std_lib }
+        RispEnv { data: std_lib, outer: None }
     }
 }
 
