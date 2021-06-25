@@ -7,3 +7,4 @@ edition = "2018"
 
 [dependencies]
 colored = "2"
+rustyline = "8.2.0"

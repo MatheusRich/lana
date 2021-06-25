@@ -5,6 +5,8 @@ mod risp_expr;
 use risp_env::RispEnv;
 use risp_err::RispErr;
 use risp_expr::RispExpr;
+use rustyline::error::ReadlineError;
+use rustyline::Editor;
 
 fn main() {
     repl();
@@ -14,10 +16,27 @@ fn repl() {
     use colored::Colorize;
 
     let env = &mut RispEnv::default();
+    let mut rl = Editor::<()>::new();
 
     loop {
-        print!("risp> ");
-        let input = slurp_expr();
+        let input = match rl.readline("risp> ") {
+            Ok(line) => {
+                rl.add_history_entry(line.as_str());
+
+                line.trim().to_string()
+            }
+            Err(ReadlineError::Interrupted) => {
+                println!("^C");
+                continue;
+            }
+            Err(ReadlineError::Eof) => {
+                break;
+            }
+            Err(err) => {
+                println!("Unexpected error while reading input: {:?}", err);
+                break;
+            }
+        };
 
         if input == "quit" || input == "exit" {
             break;
@@ -56,19 +75,6 @@ fn parse_eval(expr: String, env: &mut RispEnv) -> Result<RispExpr, RispErr> {
     Ok(evaled_expr)
 }
 
-fn slurp_expr() -> String {
-    use std::io::Write;
-
-    let mut expr = String::new();
-
-    std::io::stdout().flush().expect("Could not flush stdout");
-    std::io::stdin()
-        .read_line(&mut expr)
-        .expect("Failed to read_line");
-
-    expr.trim().to_string()
-}
-
 fn tokenize(code: String) -> Vec<String> {
     code.replace("(", " ( ")
         .replace(")", " ) ")
@@ -79,7 +85,7 @@ fn tokenize(code: String) -> Vec<String> {
 
 // Parser
 
-fn parse<'a>(tokens: &'a [String]) -> Result<(RispExpr, &'a [String]), RispErr> {
+fn parse(tokens: &[String]) -> Result<(RispExpr, &[String]), RispErr> {
     let (token, rest) = tokens
         .split_first()
         .ok_or_else(|| RispErr::Reason("Could not get token".into()))?;
@@ -91,7 +97,7 @@ fn parse<'a>(tokens: &'a [String]) -> Result<(RispExpr, &'a [String]), RispErr> 
     }
 }
 
-fn read_seq<'a>(tokens: &'a [String]) -> Result<(RispExpr, &'a [String]), RispErr> {
+fn read_seq(tokens: &[String]) -> Result<(RispExpr, &[String]), RispErr> {
     let mut res: Vec<RispExpr> = vec![];
     let mut xs = tokens;
 
@@ -228,9 +234,9 @@ fn eval_def_args(args: &[RispExpr], env: &mut RispEnv) -> Result<RispExpr, RispE
         .ok_or_else(|| RispErr::Reason("Expected assignment value".into()))?;
 
     let value = eval(value_expr, env)?;
-    env.data.insert(var_name, value);
+    env.data.insert(var_name, value.clone());
 
-    Ok(variable.clone())
+    Ok(value)
 }
 
 // Tests
