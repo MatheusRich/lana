@@ -4,6 +4,7 @@ use std::rc::Rc;
 #[derive(Clone)]
 pub enum RispExpr {
     Bool(bool),
+    Keyword(String),
     Symbol(String),
     Number(f64),
     List(Vec<RispExpr>),
@@ -16,6 +17,7 @@ impl RispExpr {
         match self {
             RispExpr::Bool(_b) => "boolean".into(),
             RispExpr::Symbol(_s) => "symbol".into(),
+            RispExpr::Keyword(_s) => "keyword".into(),
             RispExpr::Number(_n) => "number".into(),
             RispExpr::List(_) => "list".into(),
             RispExpr::Func(_) => "function".into(),
@@ -29,6 +31,7 @@ impl RispExpr {
         match self {
             RispExpr::Bool(_) => self.to_string().bold().purple().to_string(),
             RispExpr::Symbol(_) => self.to_string().bold().yellow().to_string(),
+            RispExpr::Keyword(_) => self.to_string().bold().yellow().to_string(),
             RispExpr::Number(_) => self.to_string().bold().cyan().to_string(),
             RispExpr::List(list) => {
                 let xs: Vec<String> = list
@@ -49,6 +52,7 @@ impl std::fmt::Display for RispExpr {
         let string = match self {
             RispExpr::Bool(boolean) => boolean.to_string(),
             RispExpr::Symbol(s) => s.clone(),
+            RispExpr::Keyword(s) => s.clone(),
             RispExpr::Number(n) => n.to_string(),
             RispExpr::Func(function) => format!("fn({:p})", function),
             RispExpr::Lambda(lambda) => format!("lambda({:p})", lambda),

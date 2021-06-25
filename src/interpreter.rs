@@ -5,11 +5,12 @@ use std::rc::Rc;
 
 pub fn eval(expr: &RispExpr, env: &mut RispEnv) -> Result<RispExpr, RispErr> {
     match expr {
-        RispExpr::Bool(_bool) => Ok(expr.clone()),
+        RispExpr::Bool(_) => Ok(expr.clone()),
         RispExpr::Symbol(k) => {
             env_get(k, env).ok_or_else(|| RispErr::Reason(format!("Undefined symbol '{}'", k)))
         }
-        RispExpr::Number(_n) => Ok(expr.clone()),
+        RispExpr::Keyword(_) => Ok(expr.clone()),
+        RispExpr::Number(_) => Ok(expr.clone()),
         RispExpr::List(list) => {
             let (first_form, arg_forms) = list
                 .split_first()

@@ -40,7 +40,13 @@ fn parse_atom(token: &str) -> RispExpr {
             let potential_number = token.parse::<f64>();
             match potential_number {
                 Ok(value) => RispExpr::Number(value),
-                Err(_) => RispExpr::Symbol(token.to_string()),
+                Err(_) => {
+                    if token.starts_with(':') {
+                        RispExpr::Keyword(token.to_string())
+                    } else {
+                        RispExpr::Symbol(token.to_string())
+                    }
+                }
             }
         }
     }
