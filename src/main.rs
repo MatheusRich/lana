@@ -140,23 +140,66 @@ fn eval(expr: &RispExpr, env: &mut RispEnv) -> Result<RispExpr, RispErr> {
             let (first_form, arg_forms) = list
                 .split_first()
                 .ok_or_else(|| RispErr::Reason("Expected a non-empty list".into()))?;
-            let first_eval = eval(first_form, env)?;
 
-            match first_eval {
-                RispExpr::Func(function) => {
-                    let args_eval: Result<Vec<RispExpr>, RispErr> =
-                        arg_forms.iter().map(|arg| eval(arg, env)).collect();
-
-                    function(&args_eval?)
+            match eval_built_in_form(first_form, arg_forms, env) {
+                Some(result) => result,
+                None => {
+                    let first_eval = eval(first_form, env)?;
+                    match first_eval {
+                        RispExpr::Func(function) => {
+                            let args_eval: Result<Vec<RispExpr>, RispErr> =
+                                arg_forms.iter().map(|arg| eval(arg, env)).collect();
+                            function(&args_eval?)
+                        }
+                        _ => Err(RispErr::Reason(format!(
+                            "First form must be a function, got {} '{}'",
+                            first_eval.enum_name(),
+                            first_eval.to_string()
+                        ))),
+                    }
                 }
-                _ => Err(RispErr::Reason(format!(
-                    "First form must be a function, got {} '{}'",
-                    first_eval.enum_name(),
-                    first_eval.to_string()
-                ))),
             }
         }
         RispExpr::Func(_) => Err(RispErr::Reason("Unexpected function".to_string())),
+    }
+}
+
+fn eval_built_in_form(
+    expr: &RispExpr,
+    arg_forms: &[RispExpr],
+    env: &mut RispEnv,
+) -> Option<Result<RispExpr, RispErr>> {
+    match expr {
+        RispExpr::Symbol(s) => match s.as_str() {
+            "if" => Some(eval_if_args(arg_forms, env)),
+            _ => None,
+        },
+        _ => None,
+    }
+}
+
+fn eval_if_args(args: &[RispExpr], env: &mut RispEnv) -> Result<RispExpr, RispErr> {
+    let condition_expr = args
+        .first()
+        .ok_or_else(|| RispErr::Reason("Expected if condition".into()))?;
+
+    let condition_eval = eval(condition_expr, env)?;
+
+    match condition_eval {
+        RispExpr::Bool(boolean) => {
+            let branch_index = if boolean { 1 } else { 2 };
+            let branch_name = if boolean { "then" } else { "else" };
+
+            let if_branch = args
+                .get(branch_index)
+                .ok_or_else(|| RispErr::Reason(format!("Expected if's {} branch", branch_name)))?;
+
+            eval(if_branch, env)
+        }
+        _ => Err(RispErr::Reason(format!(
+            "Expected boolean in if condition, got {:?}",
+            condition_eval,
+        ))),
     }
 }
 
