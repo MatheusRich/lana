@@ -166,12 +166,13 @@ fn eval(expr: &RispExpr, env: &mut RispEnv) -> Result<RispExpr, RispErr> {
 
 fn eval_built_in_form(
     expr: &RispExpr,
-    arg_forms: &[RispExpr],
+    args: &[RispExpr],
     env: &mut RispEnv,
 ) -> Option<Result<RispExpr, RispErr>> {
     match expr {
         RispExpr::Symbol(s) => match s.as_str() {
-            "if" => Some(eval_if_args(arg_forms, env)),
+            "if" => Some(eval_if_args(args, env)),
+            "def" => Some(eval_def_args(args, env)),
             _ => None,
         },
         _ => None,
@@ -201,6 +202,35 @@ fn eval_if_args(args: &[RispExpr], env: &mut RispEnv) -> Result<RispExpr, RispEr
             condition_eval,
         ))),
     }
+}
+
+fn eval_def_args(args: &[RispExpr], env: &mut RispEnv) -> Result<RispExpr, RispErr> {
+    let variable = args
+        .first()
+        .ok_or_else(|| RispErr::Reason("Expected variable name".into()))?;
+
+    let var_name = match variable {
+        RispExpr::Symbol(name) => Ok(name.clone()),
+        _ => Err(RispErr::Reason(format!(
+            "Expected variable name to be a symbol, got {:?}",
+            variable
+        ))),
+    }?;
+
+    if args.len() > 2 {
+        return Err(RispErr::Reason(format!(
+            "Expected only two arguments in assignment, got {}",
+            args.len()
+        )));
+    }
+    let value_expr = args
+        .get(1)
+        .ok_or_else(|| RispErr::Reason("Expected assignment value".into()))?;
+
+    let value = eval(value_expr, env)?;
+    env.data.insert(var_name, value);
+
+    Ok(variable.clone())
 }
 
 // Tests
