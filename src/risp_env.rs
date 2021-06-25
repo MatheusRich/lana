@@ -24,7 +24,7 @@ macro_rules! ensure_tonicity {
 
 pub struct RispEnv<'a> {
     pub data: HashMap<String, RispExpr>,
-    pub outer: Option<&'a RispEnv<'a>>
+    pub outer: Option<&'a RispEnv<'a>>,
 }
 
 impl<'a> RispEnv<'a> {
@@ -99,7 +99,15 @@ impl<'a> RispEnv<'a> {
             RispExpr::Func(ensure_tonicity!(|a, b| a <= b)),
         );
 
-        RispEnv { data: std_lib, outer: None }
+        std_lib.insert(
+            "<=".to_string(),
+            RispExpr::Func(ensure_tonicity!(|a, b| a <= b)),
+        );
+
+        RispEnv {
+            data: std_lib,
+            outer: None,
+        }
     }
 }
 
