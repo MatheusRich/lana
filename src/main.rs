@@ -78,6 +78,7 @@ fn parse_eval(expr: String, env: &mut RispEnv) -> Result<RispExpr, RispErr> {
 fn tokenize(code: String) -> Vec<String> {
     code.replace("(", " ( ")
         .replace(")", " ) ")
+        .replace(",", " ")
         .split_whitespace()
         .map(|it| it.to_string())
         .collect()
