@@ -112,6 +112,7 @@ fn eval_built_in_form(
             "if" => Some(eval_if_args(args, env)),
             "def" => Some(eval_def_args(args, env)),
             "fn" => Some(eval_lambda_args(args)),
+            "defn" => Some(eval_defn_args(args, env)),
             _ => None,
         },
         _ => None,
@@ -190,4 +191,24 @@ fn eval_lambda_args(args: &[RispExpr]) -> Result<RispExpr, RispErr> {
         body: Rc::new(body.clone()),
         params: Rc::new(params.clone()),
     }))
+}
+
+fn eval_defn_args(args: &[RispExpr], env: &mut RispEnv) -> Result<RispExpr, RispErr> {
+    let variable = args
+        .first()
+        .ok_or_else(|| RispErr::Reason("Expected lambda name".into()))?;
+
+    let var_name = match variable {
+        RispExpr::Symbol(name) => Ok(name.clone()),
+        _ => Err(RispErr::Reason(format!(
+            "Expected variable name to be a symbol, got {:?}",
+            variable
+        ))),
+    }?;
+
+    let lambda = eval_lambda_args(&args[1..])?;
+
+    env.data.insert(var_name, lambda.clone());
+
+    Ok(lambda)
 }

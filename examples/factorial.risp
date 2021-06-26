@@ -1,6 +1,4 @@
-(def factorial-of (fn (n) (
-  if (<= n 1) 1 (* n (factorial-of (- n 1))))))
-
+(defn factorial-of (n) (if (<= n 1) 1 (* n (factorial-of (- n 1)))))
 
 (println :Get-factorial-of)
 
