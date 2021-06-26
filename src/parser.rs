@@ -16,18 +16,12 @@ pub fn parse_all(tokens: &[String]) -> Result<Vec<RispExpr>, RispErr> {
     let mut exprs = vec![];
     let mut input = tokens;
 
-    loop {
-        match parse(input) {
-            Ok((expr, rest)) => {
-                exprs.push(expr);
-                input = rest;
+    while !input.is_empty() {
+        let (expr, rest) = parse(input)?;
 
-                if input.is_empty() {
-                    break;
-                }
-            }
-            Err(err) => return Err(err),
-        }
+        exprs.push(expr);
+
+        input = rest;
     }
 
     Ok(exprs)
