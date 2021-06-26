@@ -104,6 +104,36 @@ impl<'a> RispEnv<'a> {
             RispExpr::Func(ensure_tonicity!(|a, b| a <= b)),
         );
 
+        std_lib.insert(
+            "println".to_string(),
+            RispExpr::Func(|args| {
+                if args.is_empty() {
+                    return Err(RispErr::Reason("Expected at least one argument".into()));
+                }
+
+                for arg in args {
+                    println!("{}", arg);
+                }
+
+                Ok(args[0].clone())
+            }),
+        );
+
+        std_lib.insert(
+            "print".to_string(),
+            RispExpr::Func(|args| {
+                if args.is_empty() {
+                    return Err(RispErr::Reason("Expected at least one argument".into()));
+                }
+
+                for arg in args {
+                    print!("{}", arg);
+                }
+
+                Ok(args[0].clone())
+            }),
+        );
+
         RispEnv {
             data: std_lib,
             outer: None,

@@ -12,6 +12,27 @@ pub fn parse(tokens: &[String]) -> Result<(RispExpr, &[String]), RispErr> {
     }
 }
 
+pub fn parse_all(tokens: &[String]) -> Result<Vec<RispExpr>, RispErr> {
+    let mut exprs = vec![];
+    let mut input = tokens;
+
+    loop {
+        match parse(input) {
+            Ok((expr, rest)) => {
+                exprs.push(expr);
+                input = rest;
+
+                if input.is_empty() {
+                    break;
+                }
+            }
+            Err(err) => return Err(err),
+        }
+    }
+
+    Ok(exprs)
+}
+
 fn read_seq(tokens: &[String]) -> Result<(RispExpr, &[String]), RispErr> {
     let mut res: Vec<RispExpr> = vec![];
     let mut xs = tokens;
