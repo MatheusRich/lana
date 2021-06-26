@@ -134,6 +134,31 @@ impl<'a> RispEnv<'a> {
             }),
         );
 
+        std_lib.insert(
+            "gets".to_string(),
+            RispExpr::Func(|args| {
+                if !args.is_empty() {
+                    return Err(RispErr::Reason(format!(
+                        "Expected no arguments, got {}",
+                        args.len()
+                    )));
+                }
+
+                let mut s = String::new();
+
+                std::io::stdin()
+                    .read_line(&mut s)
+                    .map(|_| s = s.trim().to_string())
+                    .map_err(|_| RispErr::Reason("Failed to read line".into()))?;
+
+                // TODO: read to string when strings are implemented
+                match s.parse::<f64>() {
+                    Ok(n) => Ok(RispExpr::Number(n)),
+                    Err(_) => Err(RispErr::Reason("Could not parse number".into())),
+                }
+            }),
+        );
+
         RispEnv {
             data: std_lib,
             outer: None,
