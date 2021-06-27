@@ -6,6 +6,3 @@ pub fn tokenize(code: String) -> Vec<String> {
         .map(|it| it.to_string())
         .collect()
 }
-
-
-
