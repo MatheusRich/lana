@@ -3,6 +3,7 @@ use std::rc::Rc;
 
 #[derive(Clone)]
 pub enum RispExpr {
+    Nil,
     Bool(bool),
     Keyword(String),
     Symbol(String),
@@ -22,6 +23,7 @@ impl RispExpr {
             RispExpr::List(_) => "list".into(),
             RispExpr::Func(_) => "function".into(),
             RispExpr::Lambda(_) => "lambda".into(),
+            RispExpr::Nil => "nil".into(),
         }
     }
 
@@ -29,6 +31,7 @@ impl RispExpr {
         use colored::Colorize;
 
         match self {
+            RispExpr::Nil => self.to_string().bold().purple().to_string(),
             RispExpr::Bool(_) => self.to_string().bold().purple().to_string(),
             RispExpr::Symbol(_) => self.to_string().bold().yellow().to_string(),
             RispExpr::Keyword(_) => self.to_string().bold().yellow().to_string(),
@@ -50,6 +53,7 @@ impl RispExpr {
 impl std::fmt::Display for RispExpr {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         let string = match self {
+            RispExpr::Nil => "nil".to_string(),
             RispExpr::Bool(boolean) => boolean.to_string(),
             RispExpr::Symbol(s) => s.clone(),
             RispExpr::Keyword(s) => s.clone(),
@@ -69,7 +73,10 @@ impl std::fmt::Display for RispExpr {
 
 impl std::fmt::Debug for RispExpr {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{} '{}'", self.enum_name(), self.to_string())
+        match self {
+            RispExpr::Nil => write!(f, "{}", self.to_string()),
+            _ => write!(f, "{} '{}'", self.enum_name(), self.to_string()),
+        }
     }
 }
 

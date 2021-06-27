@@ -51,6 +51,7 @@ fn parse_atom(token: &str) -> RispExpr {
     match token {
         "true" => RispExpr::Bool(true),
         "false" => RispExpr::Bool(false),
+        "nil" => RispExpr::Nil,
         _ => {
             let potential_number = token.parse::<f64>();
             match potential_number {
@@ -64,5 +65,19 @@ fn parse_atom(token: &str) -> RispExpr {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_parses_nil() {
+        let input = vec![String::from("nil")];
+
+        let (result, _) = parse(&input).expect("Could not parse nil");
+
+        assert_eq!(RispExpr::Nil, result);
     }
 }

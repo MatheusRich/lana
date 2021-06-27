@@ -36,7 +36,7 @@ fn run_file(filename: String) {
             RispErr::Reason(msg) => {
                 let s = format!("ERROR: {}.", msg).bold().red().to_string();
 
-                println!("{}", s)
+                println!("{}", s);
             }
         }
     }

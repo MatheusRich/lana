@@ -5,6 +5,7 @@ use std::rc::Rc;
 
 pub fn eval(expr: &RispExpr, env: &mut RispEnv) -> Result<RispExpr, RispErr> {
     match expr {
+        RispExpr::Nil => Ok(RispExpr::Nil),
         RispExpr::Bool(_) => Ok(expr.clone()),
         RispExpr::Symbol(k) => {
             env_get(k, env).ok_or_else(|| RispErr::Reason(format!("Undefined symbol '{}'", k)))
@@ -216,9 +217,7 @@ fn eval_defn_args(args: &[RispExpr], env: &mut RispEnv) -> Result<RispExpr, Risp
 
 fn eval_do_args(args: &[RispExpr], env: &mut RispEnv) -> Result<RispExpr, RispErr> {
     if args.is_empty() {
-        return Err(RispErr::Reason(
-            "Expected at least one argument for 'do' macro".into(),
-        ));
+        return Ok(RispExpr::Nil);
     }
 
     let mut result = RispExpr::Number(0.0);
@@ -228,24 +227,6 @@ fn eval_do_args(args: &[RispExpr], env: &mut RispEnv) -> Result<RispExpr, RispEr
     }
 
     Ok(result.clone())
-    // let (variable, lambda_args) = args
-    //     .split_first()
-    //     .ok_or_else(|| RispErr::Reason("Expected lambda name".into()))?;
-
-    // let var_name = match variable {
-    //     RispExpr::Symbol(name) => Ok(name.clone()),
-    //     _ => Err(RispErr::Reason(format!(
-    //         "Expected variable name to be a symbol, got {:?}",
-    //         variable
-    //     ))),
-    // }?;
-
-    // let lambda = eval_lambda_args(lambda_args)?;
-
-    // env.data.insert(var_name, lambda.clone());
-
-    // Ok(lambda)
-    // Err(RispErr::Reason("unimplemented!".into()))
 }
 
 #[cfg(test)]
@@ -253,18 +234,13 @@ mod tests {
     use super::*;
 
     #[test]
-    fn it_expect_macro_do_to_have_at_least_one_argument() {
+    fn it_expect_macro_do_to_return_nil_if_no_args_are_given() {
         let expr = RispExpr::List(vec![RispExpr::Symbol("do".into())]);
         let mut env = RispEnv::default();
 
         let result = eval(&expr, &mut env);
 
-        assert_eq!(
-            Err(RispErr::Reason(
-                "Expected at least one argument for 'do' macro".into()
-            )),
-            result
-        )
+        assert_eq!(Ok(RispExpr::Nil), result)
     }
 
     #[test]
