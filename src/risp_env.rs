@@ -151,7 +151,6 @@ impl<'a> RispEnv<'a> {
                     .map(|_| s = s.trim().to_string())
                     .map_err(|_| RispErr::Reason("Failed to read line".into()))?;
 
-                // TODO: read to string when strings are implemented
                 match s.parse::<f64>() {
                     Ok(n) => Ok(RispExpr::Number(n)),
                     Err(_) => Err(RispErr::Reason("Could not parse number".into())),
