@@ -126,24 +126,18 @@ fn eval_if_args(args: &[RispExpr], env: &mut RispEnv) -> Result<RispExpr, RispEr
         .first()
         .ok_or_else(|| RispErr::Reason("Expected if condition".into()))?;
 
-    let condition_eval = eval(condition_expr, env)?;
+    let branch_name = match eval(condition_expr, env)? {
+        RispExpr::Bool(false) | RispExpr::Nil => "else",
+        _ => "then",
+    };
 
-    match condition_eval {
-        RispExpr::Bool(boolean) => {
-            let branch_index = if boolean { 1 } else { 2 };
-            let branch_name = if boolean { "then" } else { "else" };
+    let branch_index = if branch_name == "then" { 1 } else { 2 };
 
-            let if_branch = args
-                .get(branch_index)
-                .ok_or_else(|| RispErr::Reason(format!("Expected if's {} branch", branch_name)))?;
+    let if_branch = args
+        .get(branch_index)
+        .ok_or_else(|| RispErr::Reason(format!("Expected if's {} branch", branch_name)))?;
 
-            eval(if_branch, env)
-        }
-        _ => Err(RispErr::Reason(format!(
-            "Expected boolean in if condition, got {:?}",
-            condition_eval,
-        ))),
-    }
+    eval(if_branch, env)
 }
 
 fn eval_def_args(args: &[RispExpr], env: &mut RispEnv) -> Result<RispExpr, RispErr> {
@@ -185,7 +179,7 @@ fn eval_lambda_args(args: &[RispExpr]) -> Result<RispExpr, RispErr> {
 
     if args.len() > 2 {
         return Err(RispErr::Reason(
-            "Lambdas definition takes only 2 arguments".into(),
+            "Lambdas definition takes only 2 arguments (args and body)".into(),
         ));
     }
 
@@ -280,5 +274,65 @@ mod tests {
         let result = eval(&expr, &mut env).expect("Could not eval do macro");
 
         assert_eq!(RispExpr::Bool(false), result);
+    }
+
+    #[test]
+    fn it_expect_nil_to_be_falsey() {
+        let expr = RispExpr::List(vec![
+            RispExpr::Symbol("if".into()),
+            RispExpr::Nil,
+            RispExpr::Number(1.0),
+            RispExpr::Number(2.0),
+        ]);
+        let mut env = RispEnv::default();
+
+        let result = eval(&expr, &mut env).expect("Could not eval if macro");
+
+        assert_eq!(RispExpr::Number(2.0), result);
+    }
+
+    #[test]
+    fn it_expect_false_to_be_falsey() {
+        let expr = RispExpr::List(vec![
+            RispExpr::Symbol("if".into()),
+            RispExpr::Bool(false),
+            RispExpr::Number(1.0),
+            RispExpr::Number(2.0),
+        ]);
+        let mut env = RispEnv::default();
+
+        let result = eval(&expr, &mut env).expect("Could not eval if macro");
+
+        assert_eq!(RispExpr::Number(2.0), result);
+    }
+
+    #[test]
+    fn it_expect_true_to_be_truthy() {
+        let expr = RispExpr::List(vec![
+            RispExpr::Symbol("if".into()),
+            RispExpr::Bool(true),
+            RispExpr::Number(1.0),
+            RispExpr::Number(2.0),
+        ]);
+        let mut env = RispEnv::default();
+
+        let result = eval(&expr, &mut env).expect("Could not eval if macro");
+
+        assert_eq!(RispExpr::Number(1.0), result);
+    }
+
+    #[test]
+    fn it_expect_numbers_to_be_truthy() {
+        let expr = RispExpr::List(vec![
+            RispExpr::Symbol("if".into()),
+            RispExpr::Number(0.0),
+            RispExpr::Number(1.0),
+            RispExpr::Number(2.0),
+        ]);
+        let mut env = RispEnv::default();
+
+        let result = eval(&expr, &mut env).expect("Could not eval if macro");
+
+        assert_eq!(RispExpr::Number(1.0), result);
     }
 }
