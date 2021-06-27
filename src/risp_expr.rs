@@ -54,7 +54,7 @@ impl std::fmt::Display for RispExpr {
             RispExpr::Symbol(s) => s.clone(),
             RispExpr::Keyword(s) => s.clone(),
             RispExpr::Number(n) => n.to_string(),
-            RispExpr::Func(function) => format!("fn({:p})", function),
+            RispExpr::Func(function) => format!("fn({})", *function as usize),
             RispExpr::Lambda(lambda) => format!("lambda({:p})", lambda),
             RispExpr::List(list) => {
                 let xs: Vec<String> = list.iter().map(|value| value.to_string()).collect();
@@ -73,7 +73,17 @@ impl std::fmt::Debug for RispExpr {
     }
 }
 
-#[derive(Clone)]
+impl PartialEq for RispExpr {
+    fn eq(&self, other: &Self) -> bool {
+        if self.enum_name() != other.enum_name() {
+            return false;
+        }
+
+        self.to_string() == other.to_string()
+    }
+}
+
+#[derive(Clone, PartialEq)]
 pub struct RispLambda {
     pub params: Rc<RispExpr>,
     pub body: Rc<RispExpr>,
