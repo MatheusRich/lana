@@ -1,0 +1,10 @@
+(defn times' (n-times func current)
+    (if (< current n-times)
+        (do
+            (func current)
+            (times' n-times func (+ current 1)))
+        n-times))
+
+(defn times (n-times func) (times' n-times func 0))
+
+(times 10 (fn (i) (println i)))
