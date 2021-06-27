@@ -113,6 +113,7 @@ fn eval_built_in_form(
             "def" => Some(eval_def_args(args, env)),
             "fn" => Some(eval_lambda_args(args)),
             "defn" => Some(eval_defn_args(args, env)),
+            "do" => Some(eval_do_args(args, env)),
             _ => None,
         },
         _ => None,
@@ -194,8 +195,8 @@ fn eval_lambda_args(args: &[RispExpr]) -> Result<RispExpr, RispErr> {
 }
 
 fn eval_defn_args(args: &[RispExpr], env: &mut RispEnv) -> Result<RispExpr, RispErr> {
-    let variable = args
-        .first()
+    let (variable, lambda_args) = args
+        .split_first()
         .ok_or_else(|| RispErr::Reason("Expected lambda name".into()))?;
 
     let var_name = match variable {
@@ -206,9 +207,102 @@ fn eval_defn_args(args: &[RispExpr], env: &mut RispEnv) -> Result<RispExpr, Risp
         ))),
     }?;
 
-    let lambda = eval_lambda_args(&args[1..])?;
+    let lambda = eval_lambda_args(lambda_args)?;
 
     env.data.insert(var_name, lambda.clone());
 
     Ok(lambda)
+}
+
+fn eval_do_args(args: &[RispExpr], env: &mut RispEnv) -> Result<RispExpr, RispErr> {
+    if args.is_empty() {
+        return Err(RispErr::Reason(
+            "Expected at least one argument for 'do' macro".into(),
+        ));
+    }
+
+    let mut result = RispExpr::Number(0.0);
+
+    for expr in args {
+        result = eval(expr, env)?;
+    }
+
+    Ok(result.clone())
+    // let (variable, lambda_args) = args
+    //     .split_first()
+    //     .ok_or_else(|| RispErr::Reason("Expected lambda name".into()))?;
+
+    // let var_name = match variable {
+    //     RispExpr::Symbol(name) => Ok(name.clone()),
+    //     _ => Err(RispErr::Reason(format!(
+    //         "Expected variable name to be a symbol, got {:?}",
+    //         variable
+    //     ))),
+    // }?;
+
+    // let lambda = eval_lambda_args(lambda_args)?;
+
+    // env.data.insert(var_name, lambda.clone());
+
+    // Ok(lambda)
+    // Err(RispErr::Reason("unimplemented!".into()))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_expect_macro_do_to_have_at_least_one_argument() {
+        let expr = RispExpr::List(vec![RispExpr::Symbol("do".into())]);
+        let mut env = RispEnv::default();
+
+        let result = eval(&expr, &mut env);
+
+        assert_eq!(
+            Err(RispErr::Reason(
+                "Expected at least one argument for 'do' macro".into()
+            )),
+            result
+        )
+    }
+
+    #[test]
+    fn it_expect_do_macro_to_eval_multiple_exprs() {
+        let expr = RispExpr::List(vec![
+            RispExpr::Symbol("do".into()),
+            RispExpr::List(vec![
+                RispExpr::Symbol("def".into()),
+                RispExpr::Symbol("var1".into()),
+                RispExpr::Number(1.0),
+            ]),
+            RispExpr::List(vec![
+                RispExpr::Symbol("def".into()),
+                RispExpr::Symbol("var2".into()),
+                RispExpr::Number(2.0),
+            ]),
+        ]);
+        let mut env = RispEnv::default();
+        env.data.insert("var1".into(), RispExpr::Number(0.0));
+        env.data.insert("var2".into(), RispExpr::Number(0.0));
+
+        eval(&expr, &mut env).ok();
+
+        assert_eq!(RispExpr::Number(1.0), env.data.get("var1").unwrap().clone());
+        assert_eq!(RispExpr::Number(2.0), env.data.get("var2").unwrap().clone());
+    }
+
+    #[test]
+    fn it_expect_do_macro_to_return_last_eval() {
+        let expr = RispExpr::List(vec![
+            RispExpr::Symbol("do".into()),
+            RispExpr::Bool(true),
+            RispExpr::Bool(false),
+        ]);
+        let mut env = RispEnv::default();
+
+        let result = eval(&expr, &mut env).expect("Could not eval do macro");
+
+        assert_eq!(RispExpr::Bool(false), result);
+    }
 }
