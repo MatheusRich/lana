@@ -32,9 +32,8 @@ pub fn eval(expr: &RispExpr, env: &mut RispEnv) -> Result<RispExpr, RispErr> {
                             eval(&lambda.body, new_env)
                         }
                         _ => Err(RispErr::Reason(format!(
-                            "First form must be a function, got {} '{}'",
-                            first_eval.enum_name(),
-                            first_eval.to_string()
+                            "First form must be a function, got {:?}",
+                            first_eval
                         ))),
                     }
                 }
