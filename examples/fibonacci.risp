@@ -1,0 +1,13 @@
+(defn nth-fibonacci (n)
+    (if (<= n 2)
+        n
+        (+ (nth-fibonacci (- n 1)) (nth-fibonacci (- n 2)))))
+
+(println :Calc-nth-fibonacci)
+
+(def n (gets))
+
+(print :The-nth-fibonacci-)
+(print n)
+(print :-is-)
+(println (nth-fibonacci n))
