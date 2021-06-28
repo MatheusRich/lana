@@ -7,9 +7,9 @@ pub fn eval(expr: &RispExpr, env: &mut RispEnv) -> Result<RispExpr, RispErr> {
     match expr {
         RispExpr::Nil => Ok(RispExpr::Nil),
         RispExpr::Bool(_) => Ok(expr.clone()),
-        RispExpr::Symbol(k) => {
-            env_get(k, env).ok_or_else(|| RispErr::Reason(format!("Undefined symbol '{}'", k)))
-        }
+        RispExpr::Symbol(k) => env
+            .get(k)
+            .ok_or_else(|| RispErr::Reason(format!("Undefined symbol '{}'", k))),
         RispExpr::Keyword(_) => Ok(expr.clone()),
         RispExpr::Number(_) => Ok(expr.clone()),
         RispExpr::List(list) => {
@@ -41,16 +41,6 @@ pub fn eval(expr: &RispExpr, env: &mut RispEnv) -> Result<RispExpr, RispErr> {
         }
         RispExpr::Func(_) => Err(RispErr::Reason("Unexpected function".to_string())),
         RispExpr::Lambda(_) => Err(RispErr::Reason("Unexpected lambda".to_string())),
-    }
-}
-
-fn env_get(symbol: &str, env: &RispEnv) -> Option<RispExpr> {
-    match env.data.get(symbol) {
-        Some(expr) => Some(expr.clone()),
-        None => match &env.outer {
-            Some(outer_env) => env_get(symbol, outer_env),
-            None => None,
-        },
     }
 }
 

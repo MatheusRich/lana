@@ -15,4 +15,14 @@ impl<'a> RispEnv<'a> {
             outer: None,
         }
     }
+
+    pub fn get(&self, symbol: &str) -> Option<RispExpr> {
+        match self.data.get(symbol) {
+            Some(expr) => Some(expr.clone()),
+            None => match &self.outer {
+                Some(outer_env) => outer_env.get(symbol),
+                None => None,
+            },
+        }
+    }
 }
