@@ -1,5 +1,6 @@
 mod interpreter;
 mod parser;
+mod prelude;
 mod repl;
 mod risp_env;
 mod risp_err;
