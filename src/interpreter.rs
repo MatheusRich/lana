@@ -73,7 +73,7 @@ fn env_for_lambda<'a>(
 
     if symbols.len() != args.len() {
         return Err(LanaErr::Reason(format!(
-            "Expected {} arguments, got {}",
+            "Expected {} argument(s), got {}",
             symbols.len(),
             args.len()
         )));
@@ -114,6 +114,13 @@ fn eval_if_args(args: &[LanaExpr], env: &mut LanaEnv) -> Result<LanaExpr, LanaEr
     let condition_expr = args
         .first()
         .ok_or_else(|| LanaErr::Reason("Expected if condition".into()))?;
+
+    if args.len() > 3 {
+        return Err(LanaErr::Reason(format!(
+            "Expected 2-3 arguments, got {}",
+            args.len()
+        )));
+    }
 
     let branch_name = match eval(condition_expr, env)? {
         LanaExpr::Bool(false) | LanaExpr::Nil => "else",
