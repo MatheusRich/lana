@@ -7,15 +7,14 @@ concepts from [Clojure][clojure].
 
 ### Improved REPL
 
-Lana's REPL is a bit more powerful than RISP's. It has
+Lana's REPL is a bit more powerful than RISP's. It has:
 
 #### Input provided by ReadLine
 
-[ Add gif here ]
+You can edit, undo, delete, search, etc. It has a colored output and the last evaluated expression is
+available in the alias `_`:
 
-#### Colored output
-
-[ Add gif here ]
+![lana-repl-gif](./docs/lana-repl.gif)
 
 ### Macros (coming soon)
 
