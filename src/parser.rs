@@ -1,18 +1,18 @@
-use super::{RispErr, RispExpr};
+use super::{LanaErr, LanaExpr};
 
-pub fn parse(tokens: &[String]) -> Result<(RispExpr, &[String]), RispErr> {
+pub fn parse(tokens: &[String]) -> Result<(LanaExpr, &[String]), LanaErr> {
     let (token, rest) = tokens
         .split_first()
-        .ok_or_else(|| RispErr::Reason("Could not get token".into()))?;
+        .ok_or_else(|| LanaErr::Reason("Could not get token".into()))?;
 
     match token.as_str() {
         "(" => read_seq(rest),
-        ")" => Err(RispErr::Reason("Unexpected ')'".into())),
+        ")" => Err(LanaErr::Reason("Unexpected ')'".into())),
         _ => Ok((parse_atom(token), rest)),
     }
 }
 
-pub fn parse_all(tokens: &[String]) -> Result<Vec<RispExpr>, RispErr> {
+pub fn parse_all(tokens: &[String]) -> Result<Vec<LanaExpr>, LanaErr> {
     let mut exprs = vec![];
     let mut input = tokens;
 
@@ -27,17 +27,17 @@ pub fn parse_all(tokens: &[String]) -> Result<Vec<RispExpr>, RispErr> {
     Ok(exprs)
 }
 
-fn read_seq(tokens: &[String]) -> Result<(RispExpr, &[String]), RispErr> {
-    let mut res: Vec<RispExpr> = vec![];
+fn read_seq(tokens: &[String]) -> Result<(LanaExpr, &[String]), LanaErr> {
+    let mut res: Vec<LanaExpr> = vec![];
     let mut xs = tokens;
 
     loop {
         let (next_token, rest) = xs
             .split_first()
-            .ok_or_else(|| RispErr::Reason("could not find closing ')'".into()))?;
+            .ok_or_else(|| LanaErr::Reason("could not find closing ')'".into()))?;
 
         if next_token == ")" {
-            return Ok((RispExpr::List(res), rest));
+            return Ok((LanaExpr::List(res), rest));
         }
 
         let (expr, new_xs) = parse(&xs)?;
@@ -47,20 +47,20 @@ fn read_seq(tokens: &[String]) -> Result<(RispExpr, &[String]), RispErr> {
     }
 }
 
-fn parse_atom(token: &str) -> RispExpr {
+fn parse_atom(token: &str) -> LanaExpr {
     match token {
-        "true" => RispExpr::Bool(true),
-        "false" => RispExpr::Bool(false),
-        "nil" => RispExpr::Nil,
+        "true" => LanaExpr::Bool(true),
+        "false" => LanaExpr::Bool(false),
+        "nil" => LanaExpr::Nil,
         _ => {
             let potential_number = token.parse::<f64>();
             match potential_number {
-                Ok(value) => RispExpr::Number(value),
+                Ok(value) => LanaExpr::Number(value),
                 Err(_) => {
                     if token.starts_with(':') {
-                        RispExpr::Keyword(token.to_string())
+                        LanaExpr::Keyword(token.to_string())
                     } else {
-                        RispExpr::Symbol(token.to_string())
+                        LanaExpr::Symbol(token.to_string())
                     }
                 }
             }
@@ -78,6 +78,6 @@ mod tests {
 
         let (result, _) = parse(&input).expect("Could not parse nil");
 
-        assert_eq!(RispExpr::Nil, result);
+        assert_eq!(LanaExpr::Nil, result);
     }
 }

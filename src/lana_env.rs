@@ -1,22 +1,22 @@
-use super::{prelude, RispExpr};
+use super::{prelude, LanaExpr};
 use std::collections::HashMap;
 
-type EnvData = HashMap<String, RispExpr>;
+type EnvData = HashMap<String, LanaExpr>;
 
-pub struct RispEnv<'a> {
+pub struct LanaEnv<'a> {
     pub data: EnvData,
-    pub outer: Option<&'a RispEnv<'a>>,
+    pub outer: Option<&'a LanaEnv<'a>>,
 }
 
-impl<'a> RispEnv<'a> {
+impl<'a> LanaEnv<'a> {
     pub fn default() -> Self {
-        RispEnv {
+        LanaEnv {
             data: prelude::prelude(),
             outer: None,
         }
     }
 
-    pub fn get(&self, symbol: &str) -> Option<RispExpr> {
+    pub fn get(&self, symbol: &str) -> Option<LanaExpr> {
         match self.data.get(symbol) {
             Some(expr) => Some(expr.clone()),
             None => match &self.outer {

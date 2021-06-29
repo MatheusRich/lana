@@ -1,4 +1,7 @@
 mod interpreter;
+mod lana_env;
+mod lana_err;
+mod lana_expr;
 mod parser;
 mod prelude;
 mod repl;
@@ -7,10 +10,10 @@ mod risp_err;
 mod risp_expr;
 mod tokenize;
 
+use lana_env::LanaEnv;
+use lana_err::LanaErr;
+use lana_expr::{LanaExpr, LanaLambda};
 use repl::repl;
-use risp_env::RispEnv;
-use risp_err::RispErr;
-use risp_expr::{RispExpr, RispLambda};
 use std::env;
 
 fn main() {
@@ -34,7 +37,7 @@ fn run_file(filename: String) {
 
     if let Err(error) = eval(input) {
         match error {
-            RispErr::Reason(msg) => {
+            LanaErr::Reason(msg) => {
                 let s = format!("ERROR: {}.", msg).bold().red().to_string();
 
                 println!("{}", s);
@@ -43,10 +46,10 @@ fn run_file(filename: String) {
     }
 }
 
-fn eval(input: String) -> Result<(), RispErr> {
+fn eval(input: String) -> Result<(), LanaErr> {
     let exprs = parser::parse_all(&tokenize::tokenize(input))?;
 
-    let mut env = RispEnv::default();
+    let mut env = LanaEnv::default();
     for expr in exprs {
         interpreter::eval(&expr, &mut env)?;
     }

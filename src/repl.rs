@@ -1,15 +1,15 @@
 use super::interpreter::eval;
+use super::lana_env::LanaEnv;
+use super::lana_err::LanaErr;
+use super::lana_expr::LanaExpr;
 use super::parser::parse;
-use super::risp_env::RispEnv;
-use super::risp_err::RispErr;
-use super::risp_expr::RispExpr;
 use super::tokenize::tokenize;
 use colored::Colorize;
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
 
 pub fn repl() {
-    let env = &mut RispEnv::default();
+    let env = &mut LanaEnv::default();
     let mut rl = Editor::<()>::new();
 
     loop {
@@ -52,7 +52,7 @@ pub fn repl() {
                 println!("=> {}", res.to_colorized_string())
             }
             Err(e) => match e {
-                RispErr::Reason(msg) => {
+                LanaErr::Reason(msg) => {
                     let s = format!("ERROR: {}.", msg).bold().red().to_string();
 
                     println!("=> {}", s)
@@ -62,7 +62,7 @@ pub fn repl() {
     }
 }
 
-fn parse_eval(expr: String, env: &mut RispEnv) -> Result<RispExpr, RispErr> {
+fn parse_eval(expr: String, env: &mut LanaEnv) -> Result<LanaExpr, LanaErr> {
     let (parsed_expr, _) = parse(&tokenize(expr))?;
     let evaled_expr = eval(&parsed_expr, env)?;
 
@@ -72,5 +72,5 @@ fn parse_eval(expr: String, env: &mut RispEnv) -> Result<RispExpr, RispErr> {
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 fn prompt() -> String {
-    format!("lana {}> ", VERSION)
+    format!("lana v{}> ", VERSION)
 }

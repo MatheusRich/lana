@@ -1,4 +1,4 @@
 #[derive(Debug, PartialEq)]
-pub enum RispErr {
+pub enum LanaErr {
     Reason(String),
 }
