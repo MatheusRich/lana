@@ -13,7 +13,7 @@ pub fn repl() {
     let mut rl = Editor::<()>::new();
 
     loop {
-        let input = match rl.readline("risp> ") {
+        let input = match rl.readline(&prompt()) {
             Ok(line) => {
                 rl.add_history_entry(line.as_str());
 
@@ -67,4 +67,10 @@ fn parse_eval(expr: String, env: &mut RispEnv) -> Result<RispExpr, RispErr> {
     let evaled_expr = eval(&parsed_expr, env)?;
 
     Ok(evaled_expr)
+}
+
+const VERSION: &str = env!("CARGO_PKG_VERSION");
+
+fn prompt() -> String {
+    format!("lana {}> ", VERSION)
 }

@@ -7,11 +7,11 @@ pub fn eval(expr: &RispExpr, env: &mut RispEnv) -> Result<RispExpr, RispErr> {
     match expr {
         RispExpr::Nil => Ok(RispExpr::Nil),
         RispExpr::Bool(_) => Ok(expr.clone()),
+        RispExpr::Keyword(_) => Ok(expr.clone()),
+        RispExpr::Number(_) => Ok(expr.clone()),
         RispExpr::Symbol(k) => env
             .get(k)
             .ok_or_else(|| RispErr::Reason(format!("Undefined symbol '{}'", k))),
-        RispExpr::Keyword(_) => Ok(expr.clone()),
-        RispExpr::Number(_) => Ok(expr.clone()),
         RispExpr::List(list) => {
             let (first_form, arg_forms) = list
                 .split_first()
@@ -148,6 +148,7 @@ fn eval_def_args(args: &[RispExpr], env: &mut RispEnv) -> Result<RispExpr, RispE
             args.len()
         )));
     }
+
     let value_expr = args
         .get(1)
         .ok_or_else(|| RispErr::Reason("Expected assignment value".into()))?;

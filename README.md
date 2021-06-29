@@ -1,2 +1,3 @@
-# risp
-Lisp in Rust
+# Lana lang
+
+A LISP built in Rust
