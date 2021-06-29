@@ -101,6 +101,40 @@ pub fn prelude() -> HashMap<String, LanaExpr> {
     );
 
     prelude.insert(
+        "nil?".to_string(),
+        LanaExpr::Func(|args| {
+            if args.len() != 1 {
+                return Err(LanaErr::Reason(format!(
+                    "Expected one argument, got {}",
+                    args.len()
+                )));
+            }
+
+            match args[0] {
+                LanaExpr::Nil => Ok(LanaExpr::Bool(true)),
+                _ => Ok(LanaExpr::Bool(false)),
+            }
+        }),
+    );
+
+    prelude.insert(
+        "some?".to_string(),
+        LanaExpr::Func(|args| {
+            if args.len() != 1 {
+                return Err(LanaErr::Reason(format!(
+                    "Expected one argument, got {}",
+                    args.len()
+                )));
+            }
+
+            match args[0] {
+                LanaExpr::Nil => Ok(LanaExpr::Bool(false)),
+                _ => Ok(LanaExpr::Bool(true)),
+            }
+        }),
+    );
+
+    prelude.insert(
         "println".to_string(),
         LanaExpr::Func(|args| {
             if args.is_empty() {
