@@ -5,9 +5,6 @@ mod lana_expr;
 mod parser;
 mod prelude;
 mod repl;
-mod risp_env;
-mod risp_err;
-mod risp_expr;
 mod tokenize;
 
 use lana_env::LanaEnv;
