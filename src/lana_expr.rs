@@ -22,7 +22,13 @@ impl LanaExpr {
             LanaExpr::Number(_n) => "number".into(),
             LanaExpr::List(_) => "list".into(),
             LanaExpr::Func(_) => "function".into(),
-            LanaExpr::Lambda(_) => "lambda".into(),
+            LanaExpr::Lambda(lambda) => {
+                if lambda.eval_args {
+                    "lambda".into()
+                } else {
+                    "macro".into()
+                }
+            }
             LanaExpr::Nil => "nil".into(),
         }
     }
@@ -59,7 +65,7 @@ impl std::fmt::Display for LanaExpr {
             LanaExpr::Keyword(s) => s.clone(),
             LanaExpr::Number(n) => n.to_string(),
             LanaExpr::Func(function) => format!("fn({})", *function as usize),
-            LanaExpr::Lambda(lambda) => format!("lambda({:p})", lambda),
+            LanaExpr::Lambda(lambda) => format!("{}({:p})", self.enum_name(), lambda),
             LanaExpr::List(list) => {
                 let xs: Vec<String> = list.iter().map(|value| value.to_string()).collect();
 
@@ -94,4 +100,5 @@ impl PartialEq for LanaExpr {
 pub struct LanaLambda {
     pub params: Rc<LanaExpr>,
     pub body: Rc<LanaExpr>,
+    pub eval_args: bool,
 }

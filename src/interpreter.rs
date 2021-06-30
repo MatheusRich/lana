@@ -28,7 +28,12 @@ pub fn eval(expr: &LanaExpr, env: &mut LanaEnv) -> Result<LanaExpr, LanaErr> {
                             function(&args_eval?)
                         }
                         LanaExpr::Lambda(lambda) => {
-                            let new_env = &mut env_for_lambda(lambda.params, arg_forms, env)?;
+                            let new_env = &mut env_for_lambda(
+                                lambda.params,
+                                arg_forms,
+                                env,
+                                lambda.eval_args,
+                            )?;
                             eval(&lambda.body, new_env)
                         }
                         _ => Err(LanaErr::Reason(format!(
@@ -68,6 +73,7 @@ fn env_for_lambda<'a>(
     params: Rc<LanaExpr>,
     args: &[LanaExpr],
     outer_env: &'a mut LanaEnv,
+    eval_args: bool,
 ) -> Result<LanaEnv<'a>, LanaErr> {
     let symbols = parse_list_of_symbol_strings(params)?;
 
@@ -79,7 +85,11 @@ fn env_for_lambda<'a>(
         )));
     }
 
-    let vs = eval_exprs(args, outer_env)?;
+    let vs = if eval_args {
+        eval_exprs(args, outer_env)?
+    } else {
+        args.to_vec()
+    };
     let mut data: HashMap<String, LanaExpr> = HashMap::new();
 
     for (k, v) in symbols.iter().zip(vs.iter()) {
@@ -101,7 +111,8 @@ fn eval_built_in_form(
         LanaExpr::Symbol(s) => match s.as_str() {
             "if" => Some(eval_if_args(args, env)),
             "def" => Some(eval_def_args(args, env)),
-            "fn" => Some(eval_lambda_args(args)),
+            "fn" => Some(eval_lambda_args(args, true)),
+            "macro" => Some(eval_lambda_args(args, false)),
             "defn" => Some(eval_defn_args(args, env)),
             "do" => Some(eval_do_args(args, env)),
             _ => None,
@@ -166,7 +177,7 @@ fn eval_def_args(args: &[LanaExpr], env: &mut LanaEnv) -> Result<LanaExpr, LanaE
     Ok(value)
 }
 
-fn eval_lambda_args(args: &[LanaExpr]) -> Result<LanaExpr, LanaErr> {
+fn eval_lambda_args(args: &[LanaExpr], eval_args: bool) -> Result<LanaExpr, LanaErr> {
     let params = args
         .first()
         .ok_or_else(|| LanaErr::Reason("Expected lambda args and body".into()))?;
@@ -183,6 +194,7 @@ fn eval_lambda_args(args: &[LanaExpr]) -> Result<LanaExpr, LanaErr> {
     Ok(LanaExpr::Lambda(LanaLambda {
         body: Rc::new(body.clone()),
         params: Rc::new(params.clone()),
+        eval_args,
     }))
 }
 
@@ -199,7 +211,7 @@ fn eval_defn_args(args: &[LanaExpr], env: &mut LanaEnv) -> Result<LanaExpr, Lana
         ))),
     }?;
 
-    let lambda = eval_lambda_args(lambda_args)?;
+    let lambda = eval_lambda_args(lambda_args, true)?;
 
     env.data.insert(var_name, lambda.clone());
 
@@ -217,7 +229,7 @@ fn eval_do_args(args: &[LanaExpr], env: &mut LanaEnv) -> Result<LanaExpr, LanaEr
         result = eval(expr, env)?;
     }
 
-    Ok(result.clone())
+    Ok(result)
 }
 
 #[cfg(test)]
