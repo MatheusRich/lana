@@ -20,24 +20,31 @@ fn main() {
         1 => repl(),
         2 => run_file(args[1].clone()),
         _ => {
-            eprintln!("Wrong number of arguments");
+            print_error(
+                "Wrong number of arguments. Use `lana some-file.lana` or just `lana` for REPL",
+            );
             std::process::exit(-1);
         }
     }
 }
 
 fn run_file(filename: String) {
-    use colored::Colorize;
     use std::fs;
 
-    let input = fs::read_to_string(filename).expect("Something went wrong reading the file!");
+    let input: String;
+
+    match fs::read_to_string(filename) {
+        Ok(content) => input = content,
+        Err(msg) => {
+            print_error(&msg);
+            return;
+        }
+    };
 
     if let Err(error) = eval(input) {
         match error {
             LanaErr::Reason(msg) => {
-                let s = format!("ERROR: {}.", msg).bold().red().to_string();
-
-                println!("{}", s);
+                print_error(&msg);
             }
         }
     }
@@ -52,4 +59,12 @@ fn eval(input: String) -> Result<(), LanaErr> {
     }
 
     Ok(())
+}
+
+fn print_error(msg: impl std::fmt::Display) {
+    use colored::Colorize;
+
+    let s = format!("ERROR: {}.", msg).bold().red().to_string();
+
+    println!("{}", s);
 }
