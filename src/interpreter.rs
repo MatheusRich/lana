@@ -217,7 +217,7 @@ fn eval_do_args(args: &[LanaExpr], env: &mut LanaEnv) -> Result<LanaExpr, LanaEr
         result = eval(expr, env)?;
     }
 
-    Ok(result.clone())
+    Ok(result)
 }
 
 #[cfg(test)]

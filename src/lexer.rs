@@ -17,8 +17,12 @@ pub struct SrcLocation {
 }
 
 impl SrcLocation {
-    fn new() -> Self {
+    fn default() -> Self {
         SrcLocation { line: 1, col: 0 }
+    }
+
+    fn new(line: i32, col: i32) -> Self {
+        SrcLocation { line, col }
     }
 }
 
@@ -39,11 +43,21 @@ pub struct Tokenizer<'a> {
 }
 
 impl<'a> Tokenizer<'a> {
-    fn new(src: &'a str) -> Self {
+    pub fn new(src: &'a str) -> Self {
         Self {
             src: src.chars().peekable(),
-            loc: SrcLocation::new(),
+            loc: SrcLocation::default(),
         }
+    }
+
+    pub fn tokens(&mut self) -> Vec<Token> {
+        let mut tokens = vec![];
+
+        while let Some(token) = self.next_token() {
+            tokens.push(token);
+        }
+
+        tokens
     }
 
     fn next_token(&mut self) -> Option<Token> {
@@ -179,6 +193,46 @@ pub fn tokenize(code: String) -> Vec<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn assert_vec_eq<T>(va: &[T], vb: &[T])
+    where
+        T: std::fmt::Debug + std::cmp::PartialEq,
+    {
+        assert_eq!(va.len(), vb.len(), "Vectors have different lengths");
+
+        for (a, b) in va.iter().zip(vb) {
+            assert_eq!(a, b);
+        }
+    }
+
+    #[test]
+    fn it_parses_an_empty_input() {
+        let input = "".to_string();
+        let mut lexer = Tokenizer::new(&input);
+
+        let tokens = lexer.tokens();
+
+        assert!(tokens.is_empty())
+    }
+
+    #[test]
+    fn it_parses_multiple_tokens() {
+        let input = "(+ 1 2 ; yay \n )".to_string();
+        let mut lexer = Tokenizer::new(&input);
+
+        let tokens = lexer.tokens();
+
+        assert_vec_eq(
+            &[
+                Token::new(TokenKind::LParen, SrcLocation::new(1, 1)),
+                Token::new(TokenKind::Id("+".to_string()), SrcLocation::new(1, 2)),
+                Token::new(TokenKind::Number(1.0), SrcLocation::new(1, 4)),
+                Token::new(TokenKind::Number(2.0), SrcLocation::new(1, 6)),
+                Token::new(TokenKind::RParen, SrcLocation::new(2, 2)),
+            ],
+            &tokens,
+        );
+    }
 
     #[test]
     fn it_ignores_whitespaces() {
