@@ -2,10 +2,10 @@ mod interpreter;
 mod lana_env;
 mod lana_err;
 mod lana_expr;
+mod lexer;
 mod parser;
 mod prelude;
 mod repl;
-mod lexer;
 
 use lana_env::LanaEnv;
 use lana_err::LanaErr;
