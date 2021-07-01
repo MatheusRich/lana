@@ -5,7 +5,7 @@ mod lana_expr;
 mod parser;
 mod prelude;
 mod repl;
-mod tokenize;
+mod lexer;
 
 use lana_env::LanaEnv;
 use lana_err::LanaErr;
@@ -51,7 +51,7 @@ fn run_file(filename: String) {
 }
 
 fn eval(input: String) -> Result<(), LanaErr> {
-    let exprs = parser::parse_all(&tokenize::tokenize(input))?;
+    let exprs = parser::parse_all(&lexer::tokenize(input))?;
 
     let mut env = LanaEnv::default();
     for expr in exprs {

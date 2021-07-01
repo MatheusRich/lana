@@ -3,7 +3,7 @@ use super::lana_env::LanaEnv;
 use super::lana_err::LanaErr;
 use super::lana_expr::LanaExpr;
 use super::parser::parse;
-use super::tokenize::tokenize;
+use super::lexer::tokenize;
 use colored::Colorize;
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
