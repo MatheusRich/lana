@@ -32,7 +32,7 @@ pub enum TokenKind {
     Unknown(String),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Tokenizer<'a> {
     src: std::iter::Peekable<std::str::Chars<'a>>,
     loc: SrcLocation,
@@ -105,17 +105,13 @@ impl<'a> Tokenizer<'a> {
         let mut token: String = String::from(begin);
 
         loop {
-            let mut clone = self.clone(); // this seems very bad. IDK what to do
-            match clone.src.peek() {
-                None => break,
-                Some(c) => {
-                    if Self::is_separator(*c) {
-                        break;
-                    } else {
-                        self.next_char();
-                        token.push(*c);
-                    }
-                }
+            let is_separator = self.src.peek().map_or(true, |c| Self::is_separator(*c));
+
+            if is_separator {
+                break;
+            } else {
+                let c = self.next_char().expect("Should have a separator character");
+                token.push(c);
             }
         }
 
