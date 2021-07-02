@@ -10,6 +10,7 @@ mod repl;
 use lana_env::LanaEnv;
 use lana_err::LanaErr;
 use lana_expr::{LanaExpr, LanaLambda};
+use lexer::{Token, TokenKind};
 use repl::repl;
 use std::env;
 
@@ -42,16 +43,13 @@ fn run_file(filename: String) {
     };
 
     if let Err(error) = eval(input) {
-        match error {
-            LanaErr::Reason(msg) => {
-                print_error(&msg);
-            }
-        }
+        print_error(error);
     }
 }
 
 fn eval(input: String) -> Result<(), LanaErr> {
-    let exprs = parser::parse_all(&lexer::tokenize(input))?;
+    let tokens = lexer::Tokenizer::new(&input).tokens();
+    let exprs = parser::parse_all(&tokens)?;
 
     let mut env = LanaEnv::default();
     for expr in exprs {

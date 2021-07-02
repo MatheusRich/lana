@@ -1,12 +1,18 @@
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Clone)]
 pub struct Token {
     pub kind: TokenKind,
     pub loc: SrcLocation,
 }
 
 impl Token {
-    fn new(kind: TokenKind, loc: SrcLocation) -> Self {
+    pub fn new(kind: TokenKind, loc: SrcLocation) -> Self {
         Self { kind, loc }
+    }
+}
+
+impl std::fmt::Debug for Token {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{} at {}", self.kind, self.loc)
     }
 }
 
@@ -21,12 +27,18 @@ impl SrcLocation {
         SrcLocation { line: 1, col: 0 }
     }
 
-    fn new(line: i32, col: i32) -> Self {
+    pub fn new(line: i32, col: i32) -> Self {
         SrcLocation { line, col }
     }
 }
 
-#[derive(PartialEq, Debug)]
+impl std::fmt::Display for SrcLocation {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "line {}, column {}", self.line, self.col)
+    }
+}
+
+#[derive(PartialEq, Debug, Clone)]
 pub enum TokenKind {
     String(String),
     Number(f64),
@@ -34,6 +46,21 @@ pub enum TokenKind {
     RParen,
     Id(String),
     Unknown(String),
+}
+
+impl std::fmt::Display for TokenKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let string = match self {
+            TokenKind::String(s) => format!("'{}'", s),
+            TokenKind::Number(n) => format!("'{}'", n),
+            TokenKind::Id(k) => format!("'{}'", k),
+            TokenKind::Unknown(token) => format!("'{}'", token),
+            TokenKind::LParen => "(".to_string(),
+            TokenKind::RParen => ")".to_string(),
+        };
+
+        write!(f, "{}", string)
+    }
 }
 
 #[derive(Debug)]
@@ -106,7 +133,10 @@ impl<'a> Tokenizer<'a> {
                     _ => string.push(c),
                 },
                 None => {
-                    token = Token::new(TokenKind::Unknown(string), self.loc());
+                    let mut s = String::from("\"");
+                    s.push_str(&string); // prepending " on unterminated strings
+
+                    token = Token::new(TokenKind::Unknown(s), self.loc());
                     break;
                 }
             };
@@ -177,17 +207,6 @@ impl<'a> Tokenizer<'a> {
             _ => c.is_whitespace(),
         }
     }
-}
-
-//////////////////////////////// OLD CODE ////////////////////////////////
-
-pub fn tokenize(code: String) -> Vec<String> {
-    code.replace("(", " ( ")
-        .replace(")", " ) ")
-        .replace(",", " ")
-        .split_whitespace()
-        .map(|it| it.to_string())
-        .collect()
 }
 
 #[cfg(test)]
@@ -379,7 +398,7 @@ mod tests {
 
         assert_eq!(
             Token {
-                kind: TokenKind::Unknown("hello".to_string()),
+                kind: TokenKind::Unknown("\"hello".to_string()),
                 loc: SrcLocation { line: 1, col: 7 }
             },
             token

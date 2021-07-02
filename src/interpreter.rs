@@ -7,6 +7,7 @@ pub fn eval(expr: &LanaExpr, env: &mut LanaEnv) -> Result<LanaExpr, LanaErr> {
     match expr {
         LanaExpr::Nil => Ok(LanaExpr::Nil),
         LanaExpr::Bool(_) => Ok(expr.clone()),
+        LanaExpr::String(_) => Ok(expr.clone()),
         LanaExpr::Keyword(_) => Ok(expr.clone()),
         LanaExpr::Number(_) => Ok(expr.clone()),
         LanaExpr::Symbol(k) => env

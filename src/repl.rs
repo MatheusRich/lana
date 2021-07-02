@@ -2,7 +2,7 @@ use super::interpreter::eval;
 use super::lana_env::LanaEnv;
 use super::lana_err::LanaErr;
 use super::lana_expr::LanaExpr;
-use super::lexer::tokenize;
+use super::lexer::Tokenizer;
 use super::parser::parse;
 use colored::Colorize;
 use rustyline::error::ReadlineError;
@@ -51,19 +51,18 @@ pub fn repl() {
 
                 println!("=> {}", res.to_colorized_string())
             }
-            Err(e) => match e {
-                LanaErr::Reason(msg) => {
-                    let s = format!("ERROR: {}.", msg).bold().red().to_string();
+            Err(e) => {
+                let s = format!("ERROR: {}.", e).bold().red().to_string();
 
-                    println!("=> {}", s)
-                }
-            },
+                println!("=> {}", s)
+            }
         }
     }
 }
 
 fn parse_eval(expr: String, env: &mut LanaEnv) -> Result<LanaExpr, LanaErr> {
-    let (parsed_expr, _) = parse(&tokenize(expr))?;
+    let tokens = Tokenizer::new(&expr).tokens();
+    let (parsed_expr, _) = parse(&tokens)?;
     let evaled_expr = eval(&parsed_expr, env)?;
 
     Ok(evaled_expr)

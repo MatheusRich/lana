@@ -7,6 +7,7 @@ pub enum LanaExpr {
     Bool(bool),
     Keyword(String),
     Symbol(String),
+    String(String),
     Number(f64),
     List(Vec<LanaExpr>),
     Func(fn(&[LanaExpr]) -> Result<LanaExpr, LanaErr>),
@@ -18,6 +19,7 @@ impl LanaExpr {
         match self {
             LanaExpr::Bool(_b) => "boolean".into(),
             LanaExpr::Symbol(_s) => "symbol".into(),
+            LanaExpr::String(_s) => "string".into(),
             LanaExpr::Keyword(_s) => "keyword".into(),
             LanaExpr::Number(_n) => "number".into(),
             LanaExpr::List(_) => "list".into(),
@@ -35,6 +37,7 @@ impl LanaExpr {
             LanaExpr::Bool(_) => self.to_string().bold().purple().to_string(),
             LanaExpr::Symbol(_) => self.to_string().bold().yellow().to_string(),
             LanaExpr::Keyword(_) => self.to_string().bold().yellow().to_string(),
+            LanaExpr::String(_) => self.to_string().bold().green().to_string(),
             LanaExpr::Number(_) => self.to_string().bold().cyan().to_string(),
             LanaExpr::List(list) => {
                 let xs: Vec<String> = list
@@ -56,6 +59,7 @@ impl std::fmt::Display for LanaExpr {
             LanaExpr::Nil => "nil".to_string(),
             LanaExpr::Bool(boolean) => boolean.to_string(),
             LanaExpr::Symbol(s) => s.clone(),
+            LanaExpr::String(s) => format!("\"{}\"", s),
             LanaExpr::Keyword(s) => s.clone(),
             LanaExpr::Number(n) => n.to_string(),
             LanaExpr::Func(function) => format!("fn({})", *function as usize),
@@ -75,6 +79,7 @@ impl std::fmt::Debug for LanaExpr {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
             LanaExpr::Nil => write!(f, "{}", self.to_string()),
+            LanaExpr::String(_) => write!(f, "{} {}", self.enum_name(), self.to_string()),
             _ => write!(f, "{} '{}'", self.enum_name(), self.to_string()),
         }
     }
