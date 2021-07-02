@@ -46,7 +46,7 @@ pub enum TokenKind {
     LParen,
     RParen,
     Id(String),
-    Unknown(String),
+    UnterminatedString(String),
 }
 
 impl std::fmt::Display for TokenKind {
@@ -55,7 +55,7 @@ impl std::fmt::Display for TokenKind {
             TokenKind::String(s) => format!("'{}'", s),
             TokenKind::Number(n) => format!("'{}'", n),
             TokenKind::Id(k) => format!("'{}'", k),
-            TokenKind::Unknown(token) => format!("'{}'", token),
+            TokenKind::UnterminatedString(token) => format!("'{}'", token),
             TokenKind::LParen => "(".to_string(),
             TokenKind::RParen => ")".to_string(),
         };
@@ -137,7 +137,7 @@ impl<'a> Tokenizer<'a> {
                     let mut s = String::from("\"");
                     s.push_str(&string); // prepending " on unterminated strings
 
-                    token = Token::new(TokenKind::Unknown(s), self.loc());
+                    token = Token::new(TokenKind::UnterminatedString(s), self.loc());
                     break;
                 }
             };
@@ -399,7 +399,7 @@ mod tests {
 
         assert_eq!(
             Token {
-                kind: TokenKind::Unknown("\"hello".to_string()),
+                kind: TokenKind::UnterminatedString("\"hello".to_string()),
                 loc: SrcLocation { line: 1, col: 7 }
             },
             token
