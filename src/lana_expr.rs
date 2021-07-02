@@ -59,7 +59,7 @@ impl std::fmt::Display for LanaExpr {
             LanaExpr::Nil => "nil".to_string(),
             LanaExpr::Bool(boolean) => boolean.to_string(),
             LanaExpr::Symbol(s) => s.clone(),
-            LanaExpr::String(s) => format!("\"{}\"", s),
+            LanaExpr::String(s) => format!("{:?}", s),
             LanaExpr::Keyword(s) => s.clone(),
             LanaExpr::Number(n) => n.to_string(),
             LanaExpr::Func(function) => format!("fn({})", *function as usize),
