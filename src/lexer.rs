@@ -27,6 +27,7 @@ impl SrcLocation {
         SrcLocation { line: 1, col: 0 }
     }
 
+    #[cfg(test)]
     pub fn new(line: i32, col: i32) -> Self {
         SrcLocation { line, col }
     }
