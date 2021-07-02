@@ -80,10 +80,7 @@ mod tests {
 
     #[test]
     fn it_parses_a_number() {
-        let input = vec![Token::new(
-            TokenKind::Number(1.0),
-            SrcLocation::new(1, 3),
-        )];
+        let input = vec![Token::new(TokenKind::Number(1.0), SrcLocation::new(1, 3))];
 
         let (result, _) = parse(&input).expect("Could not parse number");
 
