@@ -3,11 +3,9 @@
         n
         (+ (nth-fibonacci (- n 1)) (nth-fibonacci (- n 2)))))
 
-(println :Calc-nth-fibonacci)
+(print "Calc nth fibonacci: ")
 
-(def n (gets))
+(def n (num (gets)))
 
-(print :The-nth-fibonacci-)
-(print n)
-(print :-is-)
+(print "The #" n " fibonacci number is ")
 (println (nth-fibonacci n))

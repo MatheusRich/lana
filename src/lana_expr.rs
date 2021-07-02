@@ -59,7 +59,7 @@ impl std::fmt::Display for LanaExpr {
             LanaExpr::Nil => "nil".to_string(),
             LanaExpr::Bool(boolean) => boolean.to_string(),
             LanaExpr::Symbol(s) => s.clone(),
-            LanaExpr::String(s) => format!("{:?}", s),
+            LanaExpr::String(s) => s.clone(),
             LanaExpr::Keyword(s) => s.clone(),
             LanaExpr::Number(n) => n.to_string(),
             LanaExpr::Func(function) => format!("fn({})", *function as usize),
@@ -79,7 +79,7 @@ impl std::fmt::Debug for LanaExpr {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
             LanaExpr::Nil => write!(f, "{}", self.to_string()),
-            LanaExpr::String(_) => write!(f, "{} {}", self.enum_name(), self.to_string()),
+            LanaExpr::String(_) => write!(f, "{} \"{}\"", self.enum_name(), self.to_string()),
             _ => write!(f, "{} '{}'", self.enum_name(), self.to_string()),
         }
     }

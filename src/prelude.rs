@@ -138,29 +138,33 @@ pub fn prelude() -> HashMap<String, LanaExpr> {
         "println".to_string(),
         LanaExpr::Func(|args| {
             if args.is_empty() {
-                return Err(LanaErr::Reason("Expected at least one argument".into()));
-            }
+                println!();
 
-            for arg in args {
-                println!("{}", arg);
-            }
+                Ok(LanaExpr::Nil)
+            } else {
+                for arg in args {
+                    println!("{}", arg);
+                }
 
-            Ok(args[0].clone())
+                Ok(args[0].clone())
+            }
         }),
     );
 
     prelude.insert(
         "print".to_string(),
         LanaExpr::Func(|args| {
+            use std::io::{self, Write};
+
             if args.is_empty() {
-                return Err(LanaErr::Reason("Expected at least one argument".into()));
+                Ok(LanaExpr::Nil)
+            } else {
+                for arg in args {
+                    print!("{}", arg);
+                }
+                io::stdout().flush().expect("Could not flush stdout");
+                Ok(args[0].clone())
             }
-
-            for arg in args {
-                print!("{}", arg);
-            }
-
-            Ok(args[0].clone())
         }),
     );
 
@@ -182,6 +186,34 @@ pub fn prelude() -> HashMap<String, LanaExpr> {
                 .map_err(|_| LanaErr::Reason("Failed to read line".into()))?;
 
             Ok(LanaExpr::String(s))
+        }),
+    );
+
+    prelude.insert(
+        "num".to_string(),
+        LanaExpr::Func(|args| {
+            if args.len() != 1 {
+                return Err(LanaErr::Reason(format!(
+                    "Expected 1 argument, got {}",
+                    args.len()
+                )));
+            }
+
+            let token = args[0].clone();
+            match &token {
+                LanaExpr::String(s) => match s.parse::<f64>() {
+                    Ok(n) => Ok(LanaExpr::Number(n)),
+                    Err(_) => Err(LanaErr::Reason(format!(
+                        "Could not parse {:?} into a number",
+                        token
+                    ))),
+                },
+                LanaExpr::Number(_) => Ok(token.clone()),
+                _ => Err(LanaErr::Reason(format!(
+                    "expected argument to be a string, got {:?}",
+                    token
+                ))),
+            }
         }),
     );
 
