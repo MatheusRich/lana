@@ -181,10 +181,7 @@ pub fn prelude() -> HashMap<String, LanaExpr> {
                 .map(|_| s = s.trim().to_string())
                 .map_err(|_| LanaErr::Reason("Failed to read line".into()))?;
 
-            match s.parse::<f64>() {
-                Ok(n) => Ok(LanaExpr::Number(n)),
-                Err(_) => Err(LanaErr::Reason("Could not parse number".into())),
-            }
+            Ok(LanaExpr::String(s))
         }),
     );
 

@@ -64,6 +64,7 @@ fn parse_atom(token: &Token) -> Result<LanaExpr, LanaErr> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::lexer::SrcLocation;
 
     #[test]
     fn it_parses_nil() {
