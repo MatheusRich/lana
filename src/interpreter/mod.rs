@@ -1,5 +1,9 @@
-use super::{LanaEnv, LanaErr, LanaExpr, LanaLambda};
+mod lana_env;
+mod prelude;
 
+use super::{LanaErr, LanaExpr, LanaLambda};
+pub use lana_env::LanaEnv;
+pub use prelude::prelude;
 use std::collections::HashMap;
 use std::rc::Rc;
 

@@ -1,16 +1,14 @@
 mod interpreter;
-mod lana_env;
 mod lana_err;
-mod lana_expr;
 mod lexer;
 mod parser;
-mod prelude;
 mod repl;
 
-use lana_env::LanaEnv;
+use interpreter::LanaEnv;
 use lana_err::LanaErr;
-use lana_expr::{LanaExpr, LanaLambda};
+use lexer::Tokenizer;
 use lexer::{Token, TokenKind};
+use parser::{parse, LanaExpr, LanaLambda};
 use repl::repl;
 use std::env;
 

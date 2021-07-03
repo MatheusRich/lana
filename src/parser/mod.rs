@@ -1,4 +1,7 @@
-use super::{LanaErr, LanaExpr, Token, TokenKind};
+mod lana_expr;
+
+use super::{LanaErr, Token, TokenKind};
+pub use lana_expr::{LanaExpr, LanaLambda};
 
 pub fn parse(tokens: &[Token]) -> Result<(LanaExpr, &[Token]), LanaErr> {
     let (token, rest) = tokens
