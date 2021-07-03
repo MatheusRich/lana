@@ -1,68 +1,8 @@
-#[derive(PartialEq, Clone)]
-pub struct Token {
-    pub kind: TokenKind,
-    pub loc: SrcLocation,
-}
+mod src_location;
+mod token;
 
-impl Token {
-    pub fn new(kind: TokenKind, loc: SrcLocation) -> Self {
-        Self { kind, loc }
-    }
-}
-
-impl std::fmt::Debug for Token {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{} at {}", self.kind, self.loc)
-    }
-}
-
-#[derive(PartialEq, Debug, Clone)]
-pub struct SrcLocation {
-    pub line: i32,
-    pub col: i32,
-}
-
-impl SrcLocation {
-    fn default() -> Self {
-        SrcLocation { line: 1, col: 0 }
-    }
-
-    #[cfg(test)]
-    pub fn new(line: i32, col: i32) -> Self {
-        SrcLocation { line, col }
-    }
-}
-
-impl std::fmt::Display for SrcLocation {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "line {}, column {}", self.line, self.col)
-    }
-}
-
-#[derive(PartialEq, Debug, Clone)]
-pub enum TokenKind {
-    String(String),
-    Number(f64),
-    LParen,
-    RParen,
-    Id(String),
-    UnterminatedString(String),
-}
-
-impl std::fmt::Display for TokenKind {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        let string = match self {
-            TokenKind::String(s) => format!("'{}'", s),
-            TokenKind::Number(n) => format!("'{}'", n),
-            TokenKind::Id(k) => format!("'{}'", k),
-            TokenKind::UnterminatedString(token) => format!("'{}'", token),
-            TokenKind::LParen => "(".to_string(),
-            TokenKind::RParen => ")".to_string(),
-        };
-
-        write!(f, "{}", string)
-    }
-}
+pub use src_location::SrcLocation;
+pub use token::{Token, TokenKind};
 
 #[derive(Debug)]
 pub struct Tokenizer<'a> {
