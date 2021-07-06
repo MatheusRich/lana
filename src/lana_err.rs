@@ -4,6 +4,7 @@ use super::Token;
 pub enum LanaErr {
     Reason(String),
     UnterminatedString(Token),
+    UnexpectedToken(Token),
 }
 
 impl std::fmt::Display for LanaErr {
@@ -11,6 +12,7 @@ impl std::fmt::Display for LanaErr {
         let string = match self {
             LanaErr::Reason(msg) => msg.to_string(),
             LanaErr::UnterminatedString(token) => format!("unterminated string {:?}", token),
+            LanaErr::UnexpectedToken(token) => format!("unexpected {:?}", token),
         };
 
         write!(f, "{}", string)

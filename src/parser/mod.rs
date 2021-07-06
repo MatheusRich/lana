@@ -10,7 +10,7 @@ pub fn parse(tokens: &[Token]) -> Result<(LanaExpr, &[Token]), LanaErr> {
 
     match token.kind {
         TokenKind::LParen => read_seq(rest, token.clone()),
-        TokenKind::RParen => Err(LanaErr::Reason(format!("unexpected {:?}", token))),
+        TokenKind::RParen => Err(LanaErr::UnexpectedToken(token.clone())),
         _ => Ok((parse_atom(token)?, rest)),
     }
 }
