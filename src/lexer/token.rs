@@ -35,8 +35,8 @@ impl std::fmt::Display for TokenKind {
             TokenKind::Number(n) => format!("'{}'", n),
             TokenKind::Id(k) => format!("'{}'", k),
             TokenKind::UnterminatedString(token) => format!("'{}'", token),
-            TokenKind::LParen => "(".to_string(),
-            TokenKind::RParen => ")".to_string(),
+            TokenKind::LParen => "'('".to_string(),
+            TokenKind::RParen => "')'".to_string(),
         };
 
         write!(f, "{}", string)

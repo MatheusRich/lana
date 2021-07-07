@@ -30,14 +30,14 @@ pub fn parse_all(tokens: &[Token]) -> Result<Vec<LanaExpr>, LanaErr> {
     Ok(exprs)
 }
 
-fn read_seq(tokens: &[Token], last: Token) -> Result<(LanaExpr, &[Token]), LanaErr> {
+fn read_seq(tokens: &[Token], opening_token: Token) -> Result<(LanaExpr, &[Token]), LanaErr> {
     let mut res: Vec<LanaExpr> = vec![];
     let mut xs = tokens;
 
     loop {
         let (next_token, rest) = xs
             .split_first()
-            .ok_or_else(|| LanaErr::Reason(format!("could not find closing ')' for {:?}", last)))?;
+            .ok_or_else(|| LanaErr::UnterminatedExpr((')', opening_token.clone())))?;
 
         if next_token.kind == TokenKind::RParen {
             return Ok((LanaExpr::List(res), rest));
@@ -59,7 +59,7 @@ fn parse_atom(token: &Token) -> Result<LanaExpr, LanaErr> {
         TokenKind::Id(value) if value == "nil" => Ok(LanaExpr::Nil),
         TokenKind::Id(value) if value.starts_with(':') => Ok(LanaExpr::Keyword(value.clone())),
         TokenKind::Id(value) => Ok(LanaExpr::Symbol(value.clone())),
-        TokenKind::UnterminatedString(_) => Err(LanaErr::UnterminatedString(token.clone())),
+        TokenKind::UnterminatedString(_) => Err(LanaErr::UnterminatedExpr(('"', token.clone()))),
         _ => panic!("Cannot parse atom from token {:?}", token),
     }
 }
