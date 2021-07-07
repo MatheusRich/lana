@@ -154,17 +154,6 @@ impl<'a> Tokenizer<'a> {
 mod tests {
     use super::*;
 
-    fn assert_vec_eq<T>(va: &[T], vb: &[T])
-    where
-        T: std::fmt::Debug + std::cmp::PartialEq,
-    {
-        assert_eq!(va.len(), vb.len(), "Vectors have different lengths");
-
-        for (a, b) in va.iter().zip(vb) {
-            assert_eq!(a, b);
-        }
-    }
-
     #[test]
     fn it_parses_an_empty_input() {
         let input = "".to_string();
@@ -182,15 +171,15 @@ mod tests {
 
         let tokens = lexer.tokens();
 
-        assert_vec_eq(
-            &[
+        assert_eq!(
+            vec![
                 Token::new(TokenKind::LParen, SrcLocation::new(1, 1)),
                 Token::new(TokenKind::Id("+".to_string()), SrcLocation::new(1, 2)),
                 Token::new(TokenKind::Number(1.0), SrcLocation::new(1, 4)),
                 Token::new(TokenKind::Number(2.0), SrcLocation::new(1, 6)),
                 Token::new(TokenKind::RParen, SrcLocation::new(2, 2)),
             ],
-            &tokens,
+            tokens,
         );
     }
 

@@ -82,11 +82,102 @@ mod tests {
     }
 
     #[test]
-    fn it_parses_a_number() {
-        let input = vec![Token::new(TokenKind::Number(1.0), SrcLocation::new(1, 3))];
+    fn it_parses_false() {
+        let input = vec![Token::new(
+            TokenKind::Id("false".into()),
+            SrcLocation::new(1, 3),
+        )];
 
-        let (result, _) = parse(&input).expect("Could not parse number");
+        let (result, _) = parse(&input).expect("Could not parse false");
 
-        assert_eq!(LanaExpr::Number(1.0), result);
+        assert_eq!(LanaExpr::Bool(false), result);
+    }
+
+    #[test]
+    fn it_parses_true() {
+        let input = vec![Token::new(
+            TokenKind::Id("true".into()),
+            SrcLocation::new(1, 3),
+        )];
+
+        let (result, _) = parse(&input).expect("Could not parse true");
+
+        assert_eq!(LanaExpr::Bool(true), result);
+    }
+
+    #[test]
+    fn it_parses_ids() {
+        let input = vec![
+            Token::new(TokenKind::Id("my-var".into()), SrcLocation::new(1, 5)),
+            Token::new(TokenKind::Id("my_var".into()), SrcLocation::new(2, 5)),
+        ];
+
+        let result = parse_all(&input).expect("Could not parse id");
+
+        assert_eq!(
+            vec![
+                LanaExpr::Symbol("my-var".to_string()),
+                LanaExpr::Symbol("my_var".to_string())
+            ],
+            result
+        );
+    }
+
+    #[test]
+    fn it_parses_keywords() {
+        let input = vec![
+            Token::new(TokenKind::Id(":my-var".into()), SrcLocation::new(1, 6)),
+            Token::new(TokenKind::Id(":1".into()), SrcLocation::new(2, 2)),
+        ];
+
+        let result = parse_all(&input).expect("Could not parse id");
+
+        assert_eq!(
+            vec![
+                LanaExpr::Keyword(":my-var".to_string()),
+                LanaExpr::Keyword(":1".to_string())
+            ],
+            result
+        );
+    }
+
+    #[test]
+    fn it_parses_numbers() {
+        let input = vec![
+            Token::new(TokenKind::Number(1.0), SrcLocation::new(1, 3)),
+            Token::new(TokenKind::Number(-1.0), SrcLocation::new(2, 3)),
+        ];
+
+        let tokens = parse_all(&input).expect("Could not parse number");
+
+        assert_eq!(vec![LanaExpr::Number(1.0), LanaExpr::Number(-1.0)], tokens);
+    }
+
+    #[test]
+    fn it_errors_on_unterminated_strings() {
+        let unterminated_string = Token::new(
+            TokenKind::UnterminatedString("\"unterminated".to_string()),
+            SrcLocation::new(1, 1),
+        );
+        let input = vec![unterminated_string.clone()];
+
+        let result = parse_all(&input).expect_err("Didn't failed on unterminated string");
+
+        assert_eq!(
+            LanaErr::UnterminatedExpr(('"', unterminated_string)),
+            result
+        );
+    }
+
+    #[test]
+    fn it_errors_on_unexpected_parethesis() {
+        let input = vec![Token::new(TokenKind::RParen, SrcLocation::new(1, 1))];
+
+        let result = parse_all(&input).expect_err("Didn't failed on unexpected token");
+
+        assert_eq!(
+            LanaErr::UnexpectedToken(Token::new(TokenKind::RParen, SrcLocation::new(1, 1))),
+            result
+        );
     }
 }
