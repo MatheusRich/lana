@@ -230,6 +230,57 @@ mod tests {
     use super::*;
 
     #[test]
+    fn it_expect_nil_to_evaluate_to_itself() {
+        let expr = LanaExpr::Nil;
+
+        let result = eval(&expr, &mut LanaEnv::default());
+
+        assert_eq!(Ok(LanaExpr::Nil), result)
+    }
+
+    #[test]
+    fn it_expect_string_to_evaluate_to_itself() {
+        let expr = LanaExpr::String("hello world".into());
+
+        let result = eval(&expr, &mut LanaEnv::default());
+
+        assert_eq!(Ok(LanaExpr::String("hello world".into())), result)
+    }
+
+    #[test]
+    fn it_expect_keyword_to_evaluate_to_itself() {
+        let expr = LanaExpr::Keyword(":ok".into());
+
+        let result = eval(&expr, &mut LanaEnv::default());
+
+        assert_eq!(Ok(LanaExpr::Keyword(":ok".into())), result)
+    }
+
+    #[test]
+    fn it_expect_symbol_to_evaluate_to_its_value() {
+        let expr = LanaExpr::Symbol("my-var".into());
+        let mut env = LanaEnv::default();
+        env.data.insert("my-var".into(), LanaExpr::Nil);
+
+        let result = eval(&expr, &mut env);
+
+        assert_eq!(Ok(LanaExpr::Nil), result)
+    }
+
+    #[test]
+    fn it_errors_on_undefined_symbols() {
+        let expr = LanaExpr::Symbol("my-var".into());
+        let mut env = LanaEnv::default();
+
+        let result = eval(&expr, &mut env);
+
+        assert_eq!(
+            Err(LanaErr::Reason("Undefined symbol 'my-var'".to_string())),
+            result
+        )
+    }
+
+    #[test]
     fn it_expect_macro_do_to_return_nil_if_no_args_are_given() {
         let expr = LanaExpr::List(vec![LanaExpr::Symbol("do".into())]);
         let mut env = LanaEnv::default();
