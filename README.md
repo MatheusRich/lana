@@ -11,7 +11,7 @@ Lana's REPL is a bit more powerful than RISP's. It has:
 
 #### Input provided by ReadLine
 
-You can edit, undo, delete, search, etc. It has a colored output and the last evaluated expression is
+You can edit, undo, delete, search, etc. It has a colored output, and the last evaluated expression is
 available in the alias `_`:
 
 ![lana-repl-gif](./docs/lana-repl.gif)
@@ -68,6 +68,15 @@ Macro for evaluating expressions in order and returns the value of the last one.
 Syntax sugar for `def` + `fn`.
 
 ```clojure
+(defn greet (who) (print "Hello, " who "!\n"))
+
+(greet "Richy")
+;; Hello, Richy!
+```
+
+## Examples
+
+```clojure
 (defn fib (n)
     (if (<= n 2)
         n
@@ -77,7 +86,7 @@ Syntax sugar for `def` + `fn`.
 ;; => 89
 ```
 
-## Examples
+You can see more examples under the [examples](./examples) directory.
 
 [risp]: https://stopa.io/post/222
 [clojure]: https://clojure.org/
