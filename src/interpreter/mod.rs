@@ -230,7 +230,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn it_expect_nil_to_evaluate_to_itself() {
+    fn it_expects_nil_to_evaluate_to_itself() {
         let expr = LanaExpr::Nil;
 
         let result = eval(&expr, &mut LanaEnv::default());
@@ -239,7 +239,7 @@ mod tests {
     }
 
     #[test]
-    fn it_expect_string_to_evaluate_to_itself() {
+    fn it_expects_string_to_evaluate_to_itself() {
         let expr = LanaExpr::String("hello world".into());
 
         let result = eval(&expr, &mut LanaEnv::default());
@@ -248,7 +248,7 @@ mod tests {
     }
 
     #[test]
-    fn it_expect_keyword_to_evaluate_to_itself() {
+    fn it_expects_keyword_to_evaluate_to_itself() {
         let expr = LanaExpr::Keyword(":ok".into());
 
         let result = eval(&expr, &mut LanaEnv::default());
@@ -257,7 +257,7 @@ mod tests {
     }
 
     #[test]
-    fn it_expect_symbol_to_evaluate_to_its_value() {
+    fn it_expects_symbol_to_evaluate_to_its_value() {
         let expr = LanaExpr::Symbol("my-var".into());
         let mut env = LanaEnv::default();
         env.data.insert("my-var".into(), LanaExpr::Nil);
@@ -281,7 +281,7 @@ mod tests {
     }
 
     #[test]
-    fn it_expect_macro_do_to_return_nil_if_no_args_are_given() {
+    fn it_expects_macro_do_to_return_nil_if_no_args_are_given() {
         let expr = LanaExpr::List(vec![LanaExpr::Symbol("do".into())]);
         let mut env = LanaEnv::default();
 
@@ -291,7 +291,7 @@ mod tests {
     }
 
     #[test]
-    fn it_expect_do_macro_to_eval_multiple_exprs() {
+    fn it_expects_do_macro_to_eval_multiple_exprs() {
         let expr = LanaExpr::List(vec![
             LanaExpr::Symbol("do".into()),
             LanaExpr::List(vec![
@@ -316,7 +316,7 @@ mod tests {
     }
 
     #[test]
-    fn it_expect_do_macro_to_return_last_eval() {
+    fn it_expects_do_macro_to_return_last_eval() {
         let expr = LanaExpr::List(vec![
             LanaExpr::Symbol("do".into()),
             LanaExpr::Bool(true),
@@ -330,7 +330,7 @@ mod tests {
     }
 
     #[test]
-    fn it_expect_nil_to_be_falsey() {
+    fn it_expects_nil_to_be_falsey() {
         let expr = LanaExpr::List(vec![
             LanaExpr::Symbol("if".into()),
             LanaExpr::Nil,
@@ -345,7 +345,7 @@ mod tests {
     }
 
     #[test]
-    fn it_expect_false_to_be_falsey() {
+    fn it_expects_false_to_be_falsey() {
         let expr = LanaExpr::List(vec![
             LanaExpr::Symbol("if".into()),
             LanaExpr::Bool(false),
@@ -360,7 +360,7 @@ mod tests {
     }
 
     #[test]
-    fn it_expect_true_to_be_truthy() {
+    fn it_expects_true_to_be_truthy() {
         let expr = LanaExpr::List(vec![
             LanaExpr::Symbol("if".into()),
             LanaExpr::Bool(true),
@@ -375,7 +375,7 @@ mod tests {
     }
 
     #[test]
-    fn it_expect_numbers_to_be_truthy() {
+    fn it_expects_numbers_to_be_truthy() {
         let expr = LanaExpr::List(vec![
             LanaExpr::Symbol("if".into()),
             LanaExpr::Number(0.0),
